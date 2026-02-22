@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LNI Admin — HQ Command Centre</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cinzel+Decorative:wght@700&family=Lato:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #C9922A; --gold-light: #F0C060; --gold-pale: #FAE8B0;
+  --deep: #0A0604; --dark: #1A1208; --mid: #2A1F0E; --warm: #3A2A12;
+  --text: #EDE0C8; --muted: #9A8870;
+  --danger: #E05050; --success: #4A9A6A; --info: #4A80C0; --warn: #C88030;
+  --radius: 8px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Lato',sans-serif; background:var(--deep); color:var(--text); min-height:100vh; }
+body::before { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events:none; z-index:0; }
+
+/* AUTH */
+#auth-screen { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:var(--deep); z-index:1000; padding:24px; }
+.auth-card { background:var(--dark); border:1px solid rgba(201,146,42,0.2); border-radius:16px; padding:48px 40px; width:100%; max-width:420px; position:relative; overflow:hidden; }
+.auth-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg, transparent, var(--gold), transparent); }
+.auth-badge { background:rgba(224,80,80,0.1); border:1px solid rgba(224,80,80,0.3); color:#F08080; font-size:10px; padding:4px 12px; border-radius:20px; display:inline-block; margin-bottom:20px; letter-spacing:0.1em; }
+.auth-card h2 { font-family:'Cinzel',serif; font-size:22px; color:var(--gold-pale); margin-bottom:6px; }
+.auth-card p { font-size:13px; color:var(--muted); margin-bottom:24px; line-height:1.6; }
+.field-group { display:flex; flex-direction:column; gap:4px; margin-bottom:14px; }
+.field-group label { font-size:11px; color:var(--muted); letter-spacing:0.1em; text-transform:uppercase; }
+.field-group input { background:var(--mid); border:1px solid rgba(201,146,42,0.15); border-radius:var(--radius); padding:12px 14px; color:var(--text); font-family:'Lato',sans-serif; font-size:14px; outline:none; transition:border-color 0.2s; width:100%; }
+.field-group input:focus { border-color:var(--gold); }
+.btn-primary { width:100%; padding:14px; background:var(--gold); border:none; border-radius:var(--radius); color:var(--deep); font-family:'Cinzel',serif; font-size:13px; font-weight:700; letter-spacing:0.1em; cursor:pointer; transition:all 0.2s; margin-top:6px; }
+.btn-primary:hover { background:var(--gold-light); }
+.btn-primary:disabled { opacity:0.5; cursor:not-allowed; }
+.auth-error { background:rgba(224,80,80,0.1); border:1px solid rgba(224,80,80,0.3); border-radius:var(--radius); padding:10px 14px; color:#F08080; font-size:13px; margin-bottom:14px; display:none; }
+
+/* LAYOUT */
+#app { display:none; min-height:100vh; }
+.app-layout { display:grid; grid-template-columns:240px 1fr; min-height:100vh; }
+.sidebar { background:var(--dark); border-right:1px solid rgba(201,146,42,0.1); display:flex; flex-direction:column; position:fixed; top:0; left:0; bottom:0; width:240px; z-index:100; overflow-y:auto; }
+.sidebar-logo { padding:20px 18px; border-bottom:1px solid rgba(201,146,42,0.1); }
+.sidebar-logo h1 { font-family:'Cinzel Decorative',serif; font-size:11px; color:var(--gold-pale); }
+.sidebar-logo p { font-size:9px; color:var(--muted); letter-spacing:0.15em; text-transform:uppercase; margin-top:2px; }
+.hq-badge { background:rgba(224,80,80,0.1); border:1px solid rgba(224,80,80,0.25); color:#F08080; font-size:8px; padding:3px 8px; border-radius:10px; margin-top:8px; display:inline-block; letter-spacing:0.08em; }
+.sidebar-nav { flex:1; padding:8px 0; }
+.nav-section { font-size:9px; color:var(--muted); letter-spacing:0.2em; text-transform:uppercase; padding:12px 18px 4px; }
+.nav-item { display:flex; align-items:center; gap:10px; padding:9px 18px; cursor:pointer; transition:all 0.15s; border-left:3px solid transparent; font-size:12.5px; color:var(--muted); }
+.nav-item:hover { background:rgba(201,146,42,0.05); color:var(--text); }
+.nav-item.active { background:rgba(201,146,42,0.08); color:var(--gold-pale); border-left-color:var(--gold); }
+.nav-item svg { width:15px; height:15px; flex-shrink:0; }
+.nav-badge { margin-left:auto; background:var(--danger); color:#fff; font-size:9px; font-weight:700; padding:2px 6px; border-radius:10px; }
+.sidebar-footer { padding:14px 18px; border-top:1px solid rgba(201,146,42,0.08); }
+.btn-logout { width:100%; padding:9px; background:transparent; border:1px solid rgba(201,146,42,0.2); border-radius:var(--radius); color:var(--muted); font-size:12px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:8px; }
+.btn-logout:hover { border-color:var(--danger); color:var(--danger); }
+
+/* MAIN */
+.main-content { margin-left:240px; display:flex; flex-direction:column; min-height:100vh; }
+.topbar { background:var(--dark); border-bottom:1px solid rgba(201,146,42,0.1); padding:14px 28px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:50; }
+.topbar h2 { font-family:'Cinzel',serif; font-size:15px; color:var(--gold-pale); }
+.topbar p { font-size:11px; color:var(--muted); margin-top:1px; }
+.panel { display:none; padding:28px; }
+.panel.active { display:block; }
+.section-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:10px; }
+.section-header h2 { font-family:'Cinzel',serif; font-size:18px; color:var(--gold-pale); }
+.section-header p { font-size:12px; color:var(--muted); margin-top:2px; line-height:1.5; }
+
+/* STATS */
+.stats-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(170px,1fr)); gap:14px; margin-bottom:24px; }
+.stat-card { background:var(--dark); border:1px solid rgba(201,146,42,0.12); border-radius:var(--radius); padding:18px; position:relative; overflow:hidden; }
+.stat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; }
+.stat-card.gold::before { background:var(--gold); }
+.stat-card.blue::before { background:var(--info); }
+.stat-card.green::before { background:var(--success); }
+.stat-card.orange::before { background:var(--warn); }
+.stat-card.red::before { background:var(--danger); }
+.stat-icon { font-size:18px; margin-bottom:8px; }
+.stat-value { font-family:'Cinzel',serif; font-size:26px; color:var(--gold-pale); line-height:1; margin-bottom:3px; }
+.stat-label { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; }
+
+/* CARDS */
+.card { background:var(--dark); border:1px solid rgba(201,146,42,0.12); border-radius:var(--radius); overflow:hidden; margin-bottom:18px; }
+.card-header { padding:14px 18px; border-bottom:1px solid rgba(201,146,42,0.08); display:flex; align-items:center; justify-content:space-between; }
+.card-header h3 { font-family:'Cinzel',serif; font-size:12px; color:var(--gold-pale); }
+.card-body { padding:18px; }
+
+/* GRIDS */
+.two-col { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+.three-col { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+
+/* TABLE */
+.data-table { width:100%; border-collapse:collapse; }
+.data-table th { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; padding:10px 12px; text-align:left; border-bottom:1px solid rgba(201,146,42,0.1); }
+.data-table td { padding:12px; font-size:12.5px; color:var(--text); border-bottom:1px solid rgba(201,146,42,0.05); vertical-align:middle; }
+.data-table tr:hover td { background:rgba(201,146,42,0.03); }
+.data-table tr:last-child td { border-bottom:none; }
+
+/* BADGES */
+.badge { font-size:10px; padding:3px 9px; border-radius:20px; display:inline-block; }
+.badge.active { background:rgba(74,154,106,0.15); color:#6ACA8A; border:1px solid rgba(74,154,106,0.3); }
+.badge.pending { background:rgba(200,128,48,0.15); color:#E0A060; border:1px solid rgba(200,128,48,0.3); }
+.badge.submitted { background:rgba(74,128,192,0.15); color:#80B0E0; border:1px solid rgba(74,128,192,0.3); }
+.badge.reviewed { background:rgba(74,154,106,0.15); color:#6ACA8A; border:1px solid rgba(74,154,106,0.3); }
+.badge.needs-action { background:rgba(224,80,80,0.15); color:#F08080; border:1px solid rgba(224,80,80,0.3); }
+.badge.inactive { background:rgba(154,136,112,0.15); color:var(--muted); border:1px solid rgba(154,136,112,0.2); }
+
+/* FORMS */
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.form-grid.single { grid-template-columns:1fr; }
+.form-grid.three { grid-template-columns:1fr 1fr 1fr; }
+.field { display:flex; flex-direction:column; gap:4px; }
+.field label { font-size:10px; color:var(--muted); letter-spacing:0.08em; text-transform:uppercase; }
+.field input, .field select, .field textarea { background:var(--mid); border:1px solid rgba(201,146,42,0.15); border-radius:var(--radius); padding:10px 12px; color:var(--text); font-family:'Lato',sans-serif; font-size:13px; outline:none; transition:border-color 0.2s; width:100%; }
+.field input:focus, .field select:focus, .field textarea:focus { border-color:var(--gold); }
+.field textarea { resize:vertical; min-height:70px; }
+.field select option { background:var(--dark); }
+
+/* BUTTONS */
+.btn-gold { padding:10px 20px; background:var(--gold); border:none; border-radius:var(--radius); color:var(--deep); font-family:'Cinzel',serif; font-size:11px; font-weight:700; letter-spacing:0.08em; cursor:pointer; transition:all 0.2s; }
+.btn-gold:hover { background:var(--gold-light); }
+.btn-gold:disabled { opacity:0.5; cursor:not-allowed; }
+.btn-outline { padding:8px 16px; background:transparent; border:1px solid rgba(201,146,42,0.3); border-radius:var(--radius); color:var(--gold); font-size:11px; cursor:pointer; transition:all 0.2s; }
+.btn-outline:hover { border-color:var(--gold); background:rgba(201,146,42,0.08); }
+.btn-sm { padding:5px 12px; font-size:11px; border-radius:5px; border:none; cursor:pointer; transition:all 0.2s; }
+.btn-sm.approve { background:rgba(74,154,106,0.15); color:#6ACA8A; border:1px solid rgba(74,154,106,0.3); }
+.btn-sm.approve:hover { background:rgba(74,154,106,0.3); }
+.btn-sm.respond { background:rgba(74,128,192,0.15); color:#80B0E0; border:1px solid rgba(74,128,192,0.3); }
+.btn-sm.respond:hover { background:rgba(74,128,192,0.3); }
+.btn-sm.warn { background:rgba(200,128,48,0.15); color:#E0A060; border:1px solid rgba(200,128,48,0.3); }
+.btn-sm.danger { background:rgba(224,80,80,0.15); color:#F08080; border:1px solid rgba(224,80,80,0.3); }
+.btn-sm.danger:hover { background:rgba(224,80,80,0.3); }
+
+/* LEADER CARD */
+.leader-row { display:flex; align-items:center; gap:12px; }
+.leader-mini-avatar { width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,var(--gold),var(--warm)); display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-size:12px; color:var(--deep); font-weight:700; flex-shrink:0; }
+
+/* MESSAGES */
+.msg-list { display:flex; flex-direction:column; gap:8px; }
+.msg-preview { padding:12px 14px; border:1px solid rgba(201,146,42,0.1); border-radius:var(--radius); cursor:pointer; transition:all 0.15s; }
+.msg-preview:hover { border-color:rgba(201,146,42,0.3); background:rgba(201,146,42,0.03); }
+.msg-preview.unread { border-left:3px solid var(--gold); }
+.msg-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
+.msg-from { font-size:12px; color:var(--gold-pale); font-weight:700; }
+.msg-time { font-size:10px; color:var(--muted); }
+.msg-text { font-size:12px; color:var(--muted); }
+
+/* THREAD */
+.message-thread { display:flex; flex-direction:column; gap:10px; max-height:380px; overflow-y:auto; padding-right:4px; }
+.message-bubble { max-width:75%; padding:10px 14px; border-radius:10px; }
+.message-bubble.from-leader { background:var(--warm); border-radius:4px 10px 10px 10px; align-self:flex-start; border-left:3px solid var(--muted); }
+.message-bubble.from-hq { background:rgba(201,146,42,0.12); border-radius:10px 4px 10px 10px; align-self:flex-end; border-right:3px solid var(--gold); }
+.message-sender { font-size:9px; color:var(--gold); margin-bottom:3px; font-weight:700; letter-spacing:0.05em; }
+.message-text { font-size:12px; color:var(--text); line-height:1.6; }
+.message-time { font-size:9px; color:var(--muted); margin-top:4px; text-align:right; }
+.message-input-area { display:flex; gap:8px; margin-top:12px; padding-top:12px; border-top:1px solid rgba(201,146,42,0.1); }
+.message-input-area textarea { flex:1; background:var(--mid); border:1px solid rgba(201,146,42,0.15); border-radius:var(--radius); padding:8px 12px; color:var(--text); font-family:'Lato',sans-serif; font-size:12px; resize:none; height:40px; outline:none; }
+.message-input-area textarea:focus { border-color:var(--gold); }
+
+/* ANNOUNCEMENTS */
+.ann-tag { font-size:9px; padding:2px 7px; border-radius:20px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; }
+.ann-tag.important { background:rgba(224,80,80,0.15); color:#F08080; border:1px solid rgba(224,80,80,0.3); }
+.ann-tag.update { background:rgba(74,128,192,0.15); color:#80B0E0; border:1px solid rgba(74,128,192,0.3); }
+.ann-tag.reminder { background:rgba(200,128,48,0.15); color:#E0A060; border:1px solid rgba(200,128,48,0.3); }
+.ann-tag.celebration { background:rgba(74,154,106,0.15); color:#6ACA8A; border:1px solid rgba(74,154,106,0.3); }
+
+/* MODAL */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.75); display:none; align-items:center; justify-content:center; z-index:500; padding:24px; }
+.modal-overlay.open { display:flex; }
+.modal-box { background:var(--dark); border:1px solid rgba(201,146,42,0.2); border-radius:12px; padding:28px; width:100%; max-width:600px; max-height:88vh; overflow-y:auto; position:relative; }
+.modal-box h3 { font-family:'Cinzel',serif; font-size:15px; color:var(--gold-pale); margin-bottom:14px; }
+.modal-close { position:absolute; top:14px; right:14px; width:26px; height:26px; background:var(--warm); border:none; border-radius:50%; color:var(--muted); cursor:pointer; font-size:12px; display:flex; align-items:center; justify-content:center; }
+.modal-close:hover { color:var(--text); }
+
+/* TOAST */
+#toast { position:fixed; bottom:20px; right:20px; z-index:9999; display:flex; flex-direction:column; gap:6px; }
+.toast-item { padding:10px 18px; border-radius:var(--radius); font-size:12px; animation:toastIn 0.3s ease; display:flex; align-items:center; gap:8px; }
+.toast-item.success { background:rgba(74,154,106,0.9); color:#fff; }
+.toast-item.error { background:rgba(224,80,80,0.9); color:#fff; }
+.toast-item.info { background:rgba(74,128,192,0.9); color:#fff; }
+@keyframes toastIn { from { opacity:0; transform:translateX(16px); } to { opacity:1; transform:translateX(0); } }
+
+/* PROGRESS */
+.progress-bar-bg { height:5px; background:var(--warm); border-radius:3px; overflow:hidden; }
+.progress-bar-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,var(--gold),var(--gold-light)); transition:width 0.8s ease; }
+
+/* MISC */
+.gold-divider { height:1px; background:linear-gradient(90deg,transparent,rgba(201,146,42,0.3),transparent); margin:18px 0; }
+.empty-state { text-align:center; padding:36px 20px; color:var(--muted); }
+.empty-state .empty-icon { font-size:36px; margin-bottom:10px; }
+.empty-state p { font-size:13px; }
+.spinner { width:18px; height:18px; border:2px solid rgba(201,146,42,0.2); border-top-color:var(--gold); border-radius:50%; animation:spin 0.7s linear infinite; display:inline-block; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.flex-between { display:flex; justify-content:space-between; align-items:center; }
+.flex { display:flex; align-items:center; }
+.gap-8 { gap:8px; }
+.gap-10 { gap:10px; }
+.mt-12 { margin-top:12px; }
+.mt-16 { margin-top:16px; }
+.mb-12 { margin-bottom:12px; }
+.text-muted { color:var(--muted); font-size:11px; }
+.text-gold { color:var(--gold); }
+.text-success { color:var(--success); }
+.text-danger { color:var(--danger); }
+.full-width { width:100%; }
+::-webkit-scrollbar { width:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--warm); border-radius:2px; }
+.search-bar { background:var(--mid); border:1px solid rgba(201,146,42,0.15); border-radius:var(--radius); padding:9px 14px; color:var(--text); font-family:'Lato',sans-serif; font-size:13px; outline:none; width:260px; transition:border-color 0.2s; }
+.search-bar:focus { border-color:var(--gold); }
+.filter-select { background:var(--mid); border:1px solid rgba(201,146,42,0.15); border-radius:var(--radius); padding:8px 12px; color:var(--text); font-size:12px; outline:none; cursor:pointer; }
+.filter-select option { background:var(--dark); }
+@media(max-width:900px) { .app-layout { grid-template-columns:1fr; } .sidebar { display:none; } .main-content { margin-left:0; } .two-col,.three-col,.form-grid { grid-template-columns:1fr; } .panel { padding:18px; } }
+</style>
+</head>
+<body>
+<div id="toast"></div>
+
+<!-- AUTH -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+      <svg width="40" height="40" viewBox="0 0 42 42" fill="none">
+        <circle cx="21" cy="21" r="20" stroke="#C9922A" stroke-width="1.5" opacity="0.4"/>
+        <path d="M21 8 C21 8, 30 14, 30 22 C30 28, 25.5 33, 21 34 C16.5 33, 12 28, 12 22 C12 14, 21 8, 21 8Z" fill="rgba(201,146,42,0.15)" stroke="#C9922A" stroke-width="1.2"/>
+        <circle cx="21" cy="22" r="2" fill="#F0C060"/>
+      </svg>
+      <div>
+        <div style="font-family:'Cinzel Decorative',serif;font-size:12px;color:var(--gold-pale)">LNI Global</div>
+        <div style="font-size:9px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase">Admin Command Centre</div>
+      </div>
+    </div>
+    <div class="auth-badge">🔐 HQ ADMIN ACCESS ONLY</div>
+    <h2>Admin Sign In</h2>
+    <p>This portal is restricted to authorised LNI HQ administrators only.</p>
+    <div class="auth-error" id="auth-error">Invalid credentials.</div>
+    <div class="field-group"><label>Admin Email</label><input type="email" id="login-email" placeholder="admin@lehemnetwork.org"></div>
+    <div class="field-group"><label>Password</label><input type="password" id="login-password" placeholder="••••••••"></div>
+    <button class="btn-primary" id="login-btn" onclick="doLogin()">Access Admin Panel</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="app-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <h1>LNI Admin</h1>
+        <p>HQ Command Centre</p>
+        <div class="hq-badge">🔐 ADMIN</div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section">Overview</div>
+        <div class="nav-item active" onclick="showPanel('overview')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Network Overview
+        </div>
+        <div class="nav-section">Leaders</div>
+        <div class="nav-item" onclick="showPanel('leaders')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          All Leaders
+        </div>
+        <div class="nav-item" onclick="showPanel('add-leader')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+          Add New Leader
+        </div>
+        <div class="nav-section">Reports</div>
+        <div class="nav-item" onclick="showPanel('reports')" id="nav-reports">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          All Reports
+          <span class="nav-badge" id="reports-badge" style="display:none">0</span>
+        </div>
+        <div class="nav-section">Communications</div>
+        <div class="nav-item" onclick="showPanel('messages')" id="nav-messages">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          Messages
+          <span class="nav-badge" id="msg-badge" style="display:none">0</span>
+        </div>
+        <div class="nav-item" onclick="showPanel('announcements')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 17H2a3 3 0 000 6h20a3 3 0 000-6zM8 12l-4-8h16l-4 8z"/></svg>
+          Post Announcement
+        </div>
+        <div class="nav-section">Network Health</div>
+        <div class="nav-item" onclick="showPanel('prayer')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/></svg>
+          Prayer Requests
+        </div>
+        <div class="nav-item" onclick="showPanel('activity')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Activity Log
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="btn-logout" onclick="doLogout()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main-content">
+      <div class="topbar">
+        <div>
+          <h2 id="topbar-title">Network Overview</h2>
+          <p id="topbar-sub">Lehem Network International — HQ Admin Panel</p>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <span id="admin-name" style="font-size:12px;color:var(--muted)">Admin</span>
+          <button class="btn-outline" onclick="showPanel('add-leader')" style="font-size:11px;padding:7px 14px">+ Add Leader</button>
+        </div>
+      </div>
+
+      <!-- ── OVERVIEW ── -->
+      <div class="panel active" id="panel-overview">
+        <div class="section-header">
+          <div><h2>Network Overview</h2><p>Live snapshot of all LNI networks worldwide</p></div>
+          <button class="btn-outline" onclick="refreshAll()" style="font-size:11px">↻ Refresh</button>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card gold"><div class="stat-icon">🌍</div><div class="stat-value" id="stat-total-leaders">–</div><div class="stat-label">Total Leaders</div></div>
+          <div class="stat-card green"><div class="stat-icon">✅</div><div class="stat-value" id="stat-active-leaders">–</div><div class="stat-label">Active This Month</div></div>
+          <div class="stat-card blue"><div class="stat-icon">👥</div><div class="stat-value" id="stat-total-members">–</div><div class="stat-label">Total Members (Reported)</div></div>
+          <div class="stat-card orange"><div class="stat-icon">✦</div><div class="stat-value" id="stat-total-salvations">–</div><div class="stat-label">Salvations (All Time)</div></div>
+          <div class="stat-card red"><div class="stat-icon">📋</div><div class="stat-value" id="stat-pending-reports">–</div><div class="stat-label">Reports Awaiting Review</div></div>
+          <div class="stat-card blue"><div class="stat-icon">💬</div><div class="stat-value" id="stat-unread-msgs">–</div><div class="stat-label">Unread Messages</div></div>
+        </div>
+
+        <div class="two-col">
+          <!-- Reports needing review -->
+          <div class="card">
+            <div class="card-header">
+              <h3>📋 Reports Awaiting Review</h3>
+              <span onclick="showPanel('reports')" style="font-size:10px;color:var(--gold);cursor:pointer">View All →</span>
+            </div>
+            <div class="card-body" id="overview-pending-reports">
+              <div class="empty-state"><div class="spinner"></div></div>
+            </div>
+          </div>
+
+          <!-- Unread messages -->
+          <div class="card">
+            <div class="card-header">
+              <h3>💬 Unread Messages</h3>
+              <span onclick="showPanel('messages')" style="font-size:10px;color:var(--gold);cursor:pointer">View All →</span>
+            </div>
+            <div class="card-body" id="overview-unread-messages">
+              <div class="empty-state"><div class="spinner"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Network map / table -->
+        <div class="card">
+          <div class="card-header">
+            <h3>🌍 All Networks At a Glance</h3>
+            <span id="last-updated" style="font-size:10px;color:var(--muted)">Loading...</span>
+          </div>
+          <div class="card-body" style="padding:0">
+            <table class="data-table" id="overview-networks-table">
+              <thead><tr>
+                <th>Leader</th><th>Network</th><th>Location</th>
+                <th>Members</th><th>Last Report</th><th>Status</th>
+              </tr></thead>
+              <tbody id="overview-networks-body">
+                <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)"><div class="spinner"></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ALL LEADERS ── -->
+      <div class="panel" id="panel-leaders">
+        <div class="section-header">
+          <div><h2>All Network Leaders</h2><p>Manage all 35+ LNI network leaders worldwide</p></div>
+          <div style="display:flex;gap:8px">
+            <input class="search-bar" type="text" id="leader-search" placeholder="Search leaders..." oninput="filterLeaders()">
+            <select class="filter-select" id="leader-filter" onchange="filterLeaders()">
+              <option value="all">All Leaders</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-body" style="padding:0">
+            <table class="data-table" id="leaders-table">
+              <thead><tr>
+                <th>Leader</th><th>Network</th><th>Location</th>
+                <th>Members</th><th>Reports</th><th>Last Active</th><th>Status</th><th>Actions</th>
+              </tr></thead>
+              <tbody id="leaders-table-body">
+                <tr><td colspan="8" style="text-align:center;padding:24px"><div class="spinner"></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ADD LEADER ── -->
+      <div class="panel" id="panel-add-leader">
+        <div class="section-header">
+          <div><h2>Add New Network Leader</h2><p>Create a login account and profile for a new LNI network leader.</p></div>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <div style="background:rgba(74,128,192,0.08);border:1px solid rgba(74,128,192,0.2);border-radius:var(--radius);padding:14px;margin-bottom:20px;font-size:12px;color:#80B0E0;line-height:1.6">
+              ℹ️ This will create a Firebase Authentication account for the leader. They will receive a password reset email at the address you provide and can set their own password to access the portal.
+            </div>
+            <div class="form-grid">
+              <div class="field"><label>First Name *</label><input type="text" id="nl-fname" placeholder="John"></div>
+              <div class="field"><label>Last Name *</label><input type="text" id="nl-lname" placeholder="Okafor"></div>
+              <div class="field"><label>Email Address *</label><input type="email" id="nl-email" placeholder="john@network.com"></div>
+              <div class="field"><label>Phone / WhatsApp</label><input type="tel" id="nl-phone" placeholder="+234..."></div>
+              <div class="field"><label>Network Name *</label><input type="text" id="nl-network" placeholder="e.g. LNI Abuja"></div>
+              <div class="field"><label>City *</label><input type="text" id="nl-city" placeholder="Abuja"></div>
+              <div class="field"><label>Country *</label><input type="text" id="nl-country" placeholder="Nigeria"></div>
+              <div class="field"><label>Network Started</label><input type="text" id="nl-started" placeholder="March 2024"></div>
+            </div>
+            <div class="form-grid single" style="margin-top:12px">
+              <div class="field"><label>Initial Notes (Internal — Leader won't see this)</label><textarea id="nl-notes" rows="2" placeholder="Any internal notes about this leader or network..."></textarea></div>
+            </div>
+            <div class="flex-between mt-16">
+              <button class="btn-outline" onclick="showPanel('leaders')">Cancel</button>
+              <button class="btn-gold" id="add-leader-btn" onclick="addNewLeader()">Create Leader Account →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ALL REPORTS ── -->
+      <div class="panel" id="panel-reports">
+        <div class="section-header">
+          <div><h2>All Network Reports</h2><p>Review and respond to monthly reports from all network leaders</p></div>
+          <div style="display:flex;gap:8px">
+            <select class="filter-select" id="report-filter" onchange="filterReports()">
+              <option value="all">All Reports</option>
+              <option value="submitted">Awaiting Review</option>
+              <option value="reviewed">Reviewed</option>
+              <option value="needs-action">Needs Action</option>
+            </select>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-body" style="padding:0">
+            <table class="data-table">
+              <thead><tr>
+                <th>Leader</th><th>Network</th><th>Period</th>
+                <th>Members</th><th>Gatherings</th><th>Salvations</th>
+                <th>Status</th><th>Submitted</th><th>Actions</th>
+              </tr></thead>
+              <tbody id="reports-table-body">
+                <tr><td colspan="9" style="text-align:center;padding:24px"><div class="spinner"></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── MESSAGES ── -->
+      <div class="panel" id="panel-messages">
+        <div class="section-header">
+          <div><h2>Messages</h2><p>All direct communications from network leaders</p></div>
+        </div>
+        <div class="two-col">
+          <!-- Conversation list -->
+          <div class="card">
+            <div class="card-header"><h3>Conversations</h3></div>
+            <div class="card-body" style="padding:12px" id="conversations-list">
+              <div class="empty-state"><div class="spinner"></div></div>
+            </div>
+          </div>
+          <!-- Active thread -->
+          <div class="card" id="active-thread-card">
+            <div class="card-header">
+              <h3 id="active-thread-name">Select a conversation</h3>
+            </div>
+            <div class="card-body">
+              <div class="message-thread" id="active-thread"></div>
+              <div class="message-input-area" id="reply-area" style="display:none">
+                <textarea id="hq-msg-input" placeholder="Reply from HQ..." rows="1" onkeydown="handleHQMsgKey(event)"></textarea>
+                <button class="btn-gold" style="padding:9px 16px;flex-shrink:0" onclick="sendHQReply()">Send</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ANNOUNCEMENTS ── -->
+      <div class="panel" id="panel-announcements">
+        <div class="section-header">
+          <div><h2>Post Announcement</h2><p>Publish official communications to all network leaders</p></div>
+        </div>
+        <div class="two-col">
+          <!-- Post form -->
+          <div class="card">
+            <div class="card-header"><h3>Create New Announcement</h3></div>
+            <div class="card-body">
+              <div class="form-grid single">
+                <div class="field"><label>Tag / Category</label>
+                  <select id="ann-tag">
+                    <option value="update">Update</option>
+                    <option value="important">Important</option>
+                    <option value="reminder">Reminder</option>
+                    <option value="celebration">Celebration</option>
+                  </select>
+                </div>
+                <div class="field"><label>Title *</label><input type="text" id="ann-title" placeholder="e.g. April Leader Call — Save the Date"></div>
+                <div class="field"><label>Body *</label><textarea id="ann-body" rows="5" placeholder="Write your announcement here..."></textarea></div>
+                <div class="field"><label>Target Audience</label>
+                  <select id="ann-audience">
+                    <option value="all">All Network Leaders</option>
+                    <option value="active">Active Leaders Only</option>
+                  </select>
+                </div>
+              </div>
+              <button class="btn-gold full-width mt-16" id="post-ann-btn" onclick="postAnnouncement()">Publish Announcement →</button>
+            </div>
+          </div>
+          <!-- Existing announcements -->
+          <div class="card">
+            <div class="card-header"><h3>Published Announcements</h3></div>
+            <div class="card-body" id="admin-announcements-list">
+              <div class="empty-state"><div class="spinner"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PRAYER REQUESTS ── -->
+      <div class="panel" id="panel-prayer">
+        <div class="section-header">
+          <div><h2>Prayer Requests</h2><p>All prayer requests from network leaders — join them in prayer</p></div>
+        </div>
+        <div class="card">
+          <div class="card-body" id="admin-prayer-list">
+            <div class="empty-state"><div class="spinner"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ACTIVITY LOG ── -->
+      <div class="panel" id="panel-activity">
+        <div class="section-header">
+          <div><h2>Activity Log</h2><p>All recent activity across the LNI network portal</p></div>
+        </div>
+        <div class="card">
+          <div class="card-body" id="activity-log">
+            <div class="empty-state"><div class="spinner"></div></div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- REPORT REVIEW MODAL -->
+<div class="modal-overlay" id="report-modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('report-modal')">✕</button>
+    <h3 id="modal-report-title">Report</h3>
+    <div id="modal-report-content"></div>
+    <div class="gold-divider"></div>
+    <div>
+      <div style="font-size:11px;color:var(--gold);margin-bottom:8px;font-family:'Cinzel',serif;letter-spacing:0.08em">RESPOND TO LEADER</div>
+      <div class="field"><textarea id="modal-feedback" rows="3" placeholder="Write your feedback, encouragement, or action required..."></textarea></div>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+        <button class="btn-sm approve" onclick="updateReportStatus('reviewed')">✓ Mark as Reviewed</button>
+        <button class="btn-sm warn" onclick="updateReportStatus('needs-action')">⚠ Needs Action</button>
+        <button class="btn-gold" style="padding:7px 16px;font-size:11px;margin-left:auto" onclick="submitReportFeedback()">Send Feedback →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LEADER DETAIL MODAL -->
+<div class="modal-overlay" id="leader-modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('leader-modal')">✕</button>
+    <h3 id="modal-leader-name">Leader Profile</h3>
+    <div id="modal-leader-content"></div>
+    <div class="gold-divider"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn-sm respond" onclick="openMessageFromLeaderModal()">💬 Send Message</button>
+      <button class="btn-sm danger" id="modal-deactivate-btn">Deactivate Account</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged,
+  sendPasswordResetEmail }
+  from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
+import { getFirestore, doc, getDoc, setDoc, addDoc, collection, query, where,
+  orderBy, getDocs, onSnapshot, updateDoc, serverTimestamp, limit, getCountFromServer }
+  from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+import { getFunctions, httpsCallable }
+  from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-functions.js';
+
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const functions = getFunctions(app);
+
+// ADMIN UID whitelist — add your Firebase UID here after first login
+const ADMIN_UIDS = ['YOUR_ADMIN_UID_HERE'];
+
+let currentAdmin = null;
+let allLeaders = [];
+let allReports = [];
+let activeThreadLeaderUid = null;
+let activeReportId = null;
+let activeLeaderUid = null;
+let unsubMessages = null;
+let unsubAnnouncements = null;
+
+onAuthStateChanged(auth, async (user) => {
+  if (user && ADMIN_UIDS.includes(user.uid)) {
+    currentAdmin = user;
+    bootAdmin();
+  } else if (user) {
+    toast('Access denied. This portal is for HQ administrators only.', 'error');
+    await signOut(auth);
+  } else {
+    document.getElementById('auth-screen').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+  }
+});
+
+function bootAdmin() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('admin-name').textContent = currentAdmin.email;
+  loadOverview();
+  loadLeaders();
+  loadReports();
+  loadMessages();
+  loadAnnouncements();
+  loadPrayerRequests();
+  loadActivityLog();
+}
+
+// ── OVERVIEW ──
+async function loadOverview() {
+  const leadersSnap = await getDocs(collection(db, 'leaders'));
+  const leaders = leadersSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+  allLeaders = leaders;
+
+  document.getElementById('stat-total-leaders').textContent = leaders.length;
+
+  const now = new Date();
+  const thisMonth = now.getMonth();
+  const thisYear = now.getFullYear();
+
+  const reportsSnap = await getDocs(collection(db, 'leader_reports'));
+  const reports = reportsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+  allReports = reports;
+
+  const pendingReports = reports.filter(r => r.status === 'submitted');
+  document.getElementById('stat-pending-reports').textContent = pendingReports.length;
+
+  if (pendingReports.length > 0) {
+    document.getElementById('reports-badge').style.display = 'inline-block';
+    document.getElementById('reports-badge').textContent = pendingReports.length;
+  }
+
+  const totalMembers = reports.reduce((sum, r) => {
+    const ts = r.createdAt?.toDate?.();
+    if (ts && ts.getMonth() === thisMonth && ts.getFullYear() === thisYear) {
+      return sum + (r.members || 0);
+    }
+    return sum;
+  }, 0);
+  document.getElementById('stat-total-members').textContent = totalMembers || '–';
+
+  const totalSalvations = reports.reduce((sum, r) => sum + (r.salvations || 0), 0);
+  document.getElementById('stat-total-salvations').textContent = totalSalvations || '–';
+
+  // Active leaders (submitted a report this month)
+  const activeLeaderUids = new Set(
+    reports.filter(r => {
+      const ts = r.createdAt?.toDate?.();
+      return ts && ts.getMonth() === thisMonth && ts.getFullYear() === thisYear;
+    }).map(r => r.leaderUid)
+  );
+  document.getElementById('stat-active-leaders').textContent = activeLeaderUids.size;
+
+  document.getElementById('last-updated').textContent =
+    'Updated ' + new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+  // Render overview network table
+  renderOverviewTable(leaders, reports);
+
+  // Pending reports preview
+  const el = document.getElementById('overview-pending-reports');
+  if (!pendingReports.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div><p>All reports reviewed</p></div>';
+  } else {
+    el.innerHTML = pendingReports.slice(0, 5).map(r => `
+      <div style="padding:10px;border:1px solid rgba(201,146,42,0.1);border-radius:var(--radius);margin-bottom:6px;cursor:pointer" onclick="openReportModal('${r.id}')">
+        <div class="flex-between">
+          <span style="font-size:12px;color:var(--gold-pale)">${r.leaderName}</span>
+          <span class="badge submitted">Awaiting Review</span>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${r.networkName} · ${r.month} ${r.year}</div>
+      </div>
+    `).join('');
+  }
+}
+
+function renderOverviewTable(leaders, reports) {
+  const latestByLeader = {};
+  reports.forEach(r => {
+    if (!latestByLeader[r.leaderUid] ||
+        r.createdAt?.toDate?.() > latestByLeader[r.leaderUid].createdAt?.toDate?.()) {
+      latestByLeader[r.leaderUid] = r;
+    }
+  });
+  const reportCountByLeader = {};
+  reports.forEach(r => { reportCountByLeader[r.leaderUid] = (reportCountByLeader[r.leaderUid] || 0) + 1; });
+
+  document.getElementById('overview-networks-body').innerHTML = leaders.map(l => {
+    const latest = latestByLeader[l.uid || l.id];
+    return `<tr>
+      <td><div class="leader-row">
+        <div class="leader-mini-avatar">${initials(l)}</div>
+        <div><div style="font-size:12px;color:var(--text)">${l.firstName} ${l.lastName}</div>
+        <div style="font-size:10px;color:var(--muted)">${l.email}</div></div>
+      </div></td>
+      <td style="font-size:12px">${l.networkName || '–'}</td>
+      <td style="font-size:12px;color:var(--muted)">${l.city || ''}${l.country ? ', ' + l.country : ''}</td>
+      <td style="font-size:13px;color:var(--gold-pale);font-weight:700">${latest?.members || '–'}</td>
+      <td style="font-size:12px;color:var(--muted)">${latest ? latest.month + ' ' + latest.year : 'None'}</td>
+      <td><span class="badge ${latest ? 'active' : 'inactive'}">${latest ? 'Reported' : 'No Reports'}</span></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted)">No leaders yet</td></tr>';
+}
+
+// ── LEADERS ──
+function loadLeaders() {
+  const q = query(collection(db, 'leaders'), orderBy('createdAt', 'desc'));
+  onSnapshot(q, (snap) => {
+    allLeaders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderLeadersTable(allLeaders);
+  });
+}
+
+function renderLeadersTable(leaders) {
+  const latestByLeader = {};
+  allReports.forEach(r => {
+    if (!latestByLeader[r.leaderUid]) latestByLeader[r.leaderUid] = r;
+  });
+  const reportCount = {};
+  allReports.forEach(r => { reportCount[r.leaderUid] = (reportCount[r.leaderUid] || 0) + 1; });
+
+  document.getElementById('leaders-table-body').innerHTML = leaders.map(l => {
+    const latest = latestByLeader[l.uid || l.id];
+    return `<tr>
+      <td><div class="leader-row">
+        <div class="leader-mini-avatar">${initials(l)}</div>
+        <div><div style="font-size:12px;color:var(--text)">${l.firstName} ${l.lastName}</div>
+        <div style="font-size:10px;color:var(--muted)">${l.email}</div></div>
+      </div></td>
+      <td style="font-size:12px">${l.networkName || '–'}</td>
+      <td style="font-size:11px;color:var(--muted)">${l.city || ''}${l.country ? ', ' + l.country : ''}</td>
+      <td style="font-size:13px;color:var(--gold-pale);font-weight:700">${latest?.members || '–'}</td>
+      <td style="font-size:12px">${reportCount[l.uid || l.id] || 0}</td>
+      <td style="font-size:11px;color:var(--muted)">${formatDate(l.lastLogin)}</td>
+      <td><span class="badge ${l.status === 'inactive' ? 'inactive' : 'active'}">${l.status || 'Active'}</span></td>
+      <td>
+        <div style="display:flex;gap:5px">
+          <button class="btn-sm respond" onclick="openLeaderModal('${l.uid || l.id}')">View</button>
+          <button class="btn-sm respond" onclick="openMessageToLeader('${l.uid || l.id}', '${l.firstName} ${l.lastName}')">💬</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--muted)">No leaders found</td></tr>';
+}
+
+window.filterLeaders = function() {
+  const search = document.getElementById('leader-search').value.toLowerCase();
+  const filter = document.getElementById('leader-filter').value;
+  const filtered = allLeaders.filter(l => {
+    const matchSearch = !search ||
+      (`${l.firstName} ${l.lastName} ${l.networkName} ${l.city} ${l.country} ${l.email}`).toLowerCase().includes(search);
+    const matchFilter = filter === 'all' || (filter === 'inactive' ? l.status === 'inactive' : l.status !== 'inactive');
+    return matchSearch && matchFilter;
+  });
+  renderLeadersTable(filtered);
+};
+
+window.openLeaderModal = async function(uid) {
+  activeLeaderUid = uid;
+  const snap = await getDoc(doc(db, 'leaders', uid));
+  if (!snap.exists()) return;
+  const l = snap.data();
+  document.getElementById('modal-leader-name').textContent = `${l.firstName} ${l.lastName}`;
+  document.getElementById('modal-leader-content').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      ${lField('Email', l.email)}${lField('Phone', l.phone)}
+      ${lField('Network', l.networkName)}${lField('City', l.city)}
+      ${lField('Country', l.country)}${lField('Started', l.networkStarted)}
+    </div>
+    ${l.bio ? `<div style="padding:12px;background:var(--warm);border-radius:var(--radius);font-size:12px;color:var(--text);line-height:1.6;margin-bottom:10px">${l.bio}</div>` : ''}
+    <div style="font-size:10px;color:var(--muted);margin-top:8px">Last login: ${formatDate(l.lastLogin)} · Created: ${formatDate(l.createdAt)}</div>
+  `;
+  document.getElementById('modal-deactivate-btn').onclick = () => toggleLeaderStatus(uid, l.status);
+  document.getElementById('modal-deactivate-btn').textContent =
+    l.status === 'inactive' ? 'Reactivate Account' : 'Deactivate Account';
+  document.getElementById('leader-modal').classList.add('open');
+};
+
+function lField(label, value) {
+  return `<div style="background:var(--warm);padding:10px;border-radius:var(--radius)">
+    <div style="font-size:9px;color:var(--muted);margin-bottom:3px">${label.toUpperCase()}</div>
+    <div style="font-size:12px;color:var(--text)">${value || '–'}</div>
+  </div>`;
+}
+
+window.toggleLeaderStatus = async function(uid, currentStatus) {
+  const newStatus = currentStatus === 'inactive' ? 'active' : 'inactive';
+  await updateDoc(doc(db, 'leaders', uid), { status: newStatus });
+  toast(`Leader ${newStatus === 'inactive' ? 'deactivated' : 'reactivated'}`, 'success');
+  closeModal('leader-modal');
+};
+
+// ── ADD LEADER ──
+window.addNewLeader = async function() {
+  const email = document.getElementById('nl-email').value.trim();
+  const firstName = document.getElementById('nl-fname').value.trim();
+  const lastName = document.getElementById('nl-lname').value.trim();
+  if (!email || !firstName || !lastName) { toast('First name, last name and email are required', 'error'); return; }
+
+  const btn = document.getElementById('add-leader-btn');
+  btn.disabled = true; btn.textContent = 'Creating account...';
+
+  try {
+    // Call Firebase Cloud Function to create user
+    const createUser = httpsCallable(functions, 'createLeaderAccount');
+    const result = await createUser({
+      email, firstName, lastName,
+      phone: document.getElementById('nl-phone').value.trim(),
+      networkName: document.getElementById('nl-network').value.trim(),
+      city: document.getElementById('nl-city').value.trim(),
+      country: document.getElementById('nl-country').value.trim(),
+      networkStarted: document.getElementById('nl-started').value.trim(),
+      adminNotes: document.getElementById('nl-notes').value.trim(),
+    });
+
+    toast(`Account created! ${firstName} will receive a password setup email at ${email}`, 'success');
+
+    // Log activity
+    await addDoc(collection(db, 'activity_log'), {
+      type: 'leader_created', adminEmail: currentAdmin.email,
+      details: `Created account for ${firstName} ${lastName} (${email})`,
+      createdAt: serverTimestamp(),
+    });
+
+    ['nl-fname','nl-lname','nl-email','nl-phone','nl-network','nl-city','nl-country','nl-started','nl-notes']
+      .forEach(id => { document.getElementById(id).value = ''; });
+    showPanel('leaders');
+
+  } catch(e) {
+    // Fallback: create Firestore record + send reset email manually
+    // This works without Cloud Functions for simpler setups
+    toast('Note: To create Firebase Auth accounts, set up the Cloud Function. Firestore record created.', 'info');
+
+    await addDoc(collection(db, 'pending_leaders'), {
+      email, firstName, lastName,
+      phone: document.getElementById('nl-phone').value.trim(),
+      networkName: document.getElementById('nl-network').value.trim(),
+      city: document.getElementById('nl-city').value.trim(),
+      country: document.getElementById('nl-country').value.trim(),
+      networkStarted: document.getElementById('nl-started').value.trim(),
+      adminNotes: document.getElementById('nl-notes').value.trim(),
+      status: 'pending_account',
+      createdAt: serverTimestamp(),
+      createdBy: currentAdmin.email,
+    });
+    toast('Leader profile saved. Send them the portal link and have them register.', 'info');
+    showPanel('leaders');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Create Leader Account →';
+  }
+};
+
+// ── REPORTS ──
+function loadReports() {
+  const q = query(collection(db, 'leader_reports'), orderBy('createdAt', 'desc'));
+  onSnapshot(q, (snap) => {
+    allReports = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderReportsTable(allReports);
+    const pending = allReports.filter(r => r.status === 'submitted').length;
+    if (pending > 0) {
+      document.getElementById('reports-badge').style.display = 'inline-block';
+      document.getElementById('reports-badge').textContent = pending;
+      document.getElementById('stat-pending-reports').textContent = pending;
+    }
+  });
+}
+
+function renderReportsTable(reports) {
+  document.getElementById('reports-table-body').innerHTML = reports.map(r => `
+    <tr>
+      <td><div style="font-size:12px;color:var(--text)">${r.leaderName}</div><div style="font-size:10px;color:var(--muted)">${r.email||''}</div></td>
+      <td style="font-size:12px">${r.networkName}</td>
+      <td style="font-size:12px">${r.month} ${r.year}</td>
+      <td style="font-size:13px;color:var(--gold-pale);font-weight:700">${r.members||0}</td>
+      <td style="font-size:12px">${r.gatherings||0}</td>
+      <td style="font-size:12px">${r.salvations||0}</td>
+      <td><span class="badge ${r.status==='reviewed'?'reviewed':r.status==='needs-action'?'needs-action':'submitted'}">
+        ${r.status==='reviewed'?'✓ Reviewed':r.status==='needs-action'?'⚠ Action':' Awaiting'}
+      </span></td>
+      <td style="font-size:11px;color:var(--muted)">${formatDate(r.createdAt)}</td>
+      <td><button class="btn-sm respond" onclick="openReportModal('${r.id}')">Review</button></td>
+    </tr>
+  `).join('') || '<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--muted)">No reports yet</td></tr>';
+}
+
+window.filterReports = function() {
+  const filter = document.getElementById('report-filter').value;
+  const filtered = filter === 'all' ? allReports : allReports.filter(r => r.status === filter);
+  renderReportsTable(filtered);
+};
+
+window.openReportModal = async function(reportId) {
+  activeReportId = reportId;
+  const snap = await getDoc(doc(db, 'leader_reports', reportId));
+  if (!snap.exists()) return;
+  const r = snap.data();
+  document.getElementById('modal-report-title').textContent = `${r.leaderName} — ${r.month} ${r.year}`;
+  document.getElementById('modal-report-content').innerHTML = `
+    <div style="font-size:11px;color:var(--muted);margin-bottom:12px">${r.networkName} · ${r.city||''}, ${r.country||''}</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
+      ${rStat('Members',r.members)}${rStat('New',r.newMembers)}${rStat('Gatherings',r.gatherings)}
+      ${rStat('Avg Attend.',r.avgAttendance)}${rStat('Salvations',r.salvations)}${rStat('Miracles',r.miracles)}
+      ${rStat('Outreach',r.outreach)}${rStat('Disciples',r.disciples)}
+    </div>
+    ${rSection('Testimonies & Highlights', r.testimonies)}
+    ${rSection('Challenges & Prayer Points', r.challenges)}
+    ${rSection('Support Requested from HQ', r.support)}
+    ${rSection('Vision for Next Month', r.vision)}
+    ${r.hqFeedback ? `<div style="margin-top:10px;padding:10px;background:rgba(74,154,106,0.08);border:1px solid rgba(74,154,106,0.2);border-radius:var(--radius)"><p style="font-size:10px;color:var(--success);margin-bottom:4px">PREVIOUS HQ FEEDBACK</p><p style="font-size:12px;color:var(--text)">${r.hqFeedback}</p></div>` : ''}
+  `;
+  document.getElementById('modal-feedback').value = r.hqFeedback || '';
+  document.getElementById('report-modal').classList.add('open');
+};
+
+function rStat(l, v) {
+  return `<div style="background:var(--warm);padding:8px;border-radius:var(--radius);text-align:center">
+    <div style="font-size:16px;color:var(--gold-pale);font-weight:700">${v||0}</div>
+    <div style="font-size:9px;color:var(--muted);text-transform:uppercase;margin-top:2px">${l}</div>
+  </div>`;
+}
+
+function rSection(label, value) {
+  if (!value) return '';
+  return `<div style="margin-bottom:10px"><p style="font-size:10px;color:var(--gold);margin-bottom:3px">${label.toUpperCase()}</p><p style="font-size:12px;color:var(--text);line-height:1.7">${value}</p></div>`;
+}
+
+window.updateReportStatus = async function(status) {
+  if (!activeReportId) return;
+  await updateDoc(doc(db, 'leader_reports', activeReportId), { status });
+  toast(`Report marked as ${status}`, 'success');
+  loadReports();
+};
+
+window.submitReportFeedback = async function() {
+  if (!activeReportId) return;
+  const feedback = document.getElementById('modal-feedback').value.trim();
+  if (!feedback) { toast('Please write feedback before sending', 'error'); return; }
+  await updateDoc(doc(db, 'leader_reports', activeReportId), {
+    hqFeedback: feedback, status: 'reviewed', reviewedAt: serverTimestamp(), reviewedBy: currentAdmin.email,
+  });
+  // Log activity
+  await addDoc(collection(db, 'activity_log'), {
+    type: 'report_reviewed', adminEmail: currentAdmin.email,
+    details: `Reviewed report ${activeReportId}`,
+    createdAt: serverTimestamp(),
+  });
+  toast('Feedback sent to leader!', 'success');
+  closeModal('report-modal');
+};
+
+// ── MESSAGES ──
+let allConversations = {};
+
+function loadMessages() {
+  const q = query(collection(db, 'messages'), orderBy('createdAt', 'asc'));
+  onSnapshot(q, (snap) => {
+    const msgs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    // Group by leader
+    allConversations = {};
+    msgs.forEach(m => {
+      if (!allConversations[m.leaderUid]) {
+        allConversations[m.leaderUid] = {
+          leaderUid: m.leaderUid, leaderName: m.leaderName,
+          networkName: m.networkName, messages: [],
+        };
+      }
+      allConversations[m.leaderUid].messages.push(m);
+    });
+    renderConversationsList();
+    const unread = msgs.filter(m => m.from === 'leader' && !m.readByHQ).length;
+    const badge = document.getElementById('msg-badge');
+    if (unread > 0) {
+      badge.style.display = 'inline-block';
+      badge.textContent = unread;
+      document.getElementById('stat-unread-msgs').textContent = unread;
+    } else {
+      badge.style.display = 'none';
+      document.getElementById('stat-unread-msgs').textContent = 0;
+    }
+    // Render unread preview in overview
+    const unreadMsgs = msgs.filter(m => m.from === 'leader' && !m.readByHQ);
+    const ovEl = document.getElementById('overview-unread-messages');
+    if (!unreadMsgs.length) {
+      ovEl.innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div><p>No unread messages</p></div>';
+    } else {
+      ovEl.innerHTML = unreadMsgs.slice(0,4).map(m =>
+        `<div class="msg-preview unread" onclick="openThread('${m.leaderUid}')">
+          <div class="msg-header"><span class="msg-from">${m.leaderName}</span><span class="msg-time">${formatDate(m.createdAt)}</span></div>
+          <div class="msg-text">${m.text.substring(0,80)}${m.text.length>80?'...':''}</div>
+        </div>`
+      ).join('');
+    }
+    if (activeThreadLeaderUid) openThread(activeThreadLeaderUid);
+  });
+}
+
+function renderConversationsList() {
+  const el = document.getElementById('conversations-list');
+  const convs = Object.values(allConversations);
+  if (!convs.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">💬</div><p>No messages yet</p></div>';
+    return;
+  }
+  el.innerHTML = convs.map(conv => {
+    const lastMsg = conv.messages[conv.messages.length - 1];
+    const hasUnread = conv.messages.some(m => m.from === 'leader' && !m.readByHQ);
+    return `<div class="msg-preview ${hasUnread ? 'unread' : ''}" onclick="openThread('${conv.leaderUid}')">
+      <div class="msg-header">
+        <span class="msg-from">${conv.leaderName}</span>
+        <span class="msg-time">${formatDate(lastMsg.createdAt)}</span>
+      </div>
+      <div class="msg-text">${conv.networkName} · ${lastMsg.text.substring(0, 60)}...</div>
+    </div>`;
+  }).join('');
+}
+
+window.openThread = async function(leaderUid) {
+  activeThreadLeaderUid = leaderUid;
+  const conv = allConversations[leaderUid];
+  if (!conv) return;
+  document.getElementById('active-thread-name').textContent = `${conv.leaderName} — ${conv.networkName}`;
+  document.getElementById('reply-area').style.display = 'flex';
+  const thread = document.getElementById('active-thread');
+  thread.innerHTML = conv.messages.map(m => `
+    <div class="message-bubble ${m.from === 'hq' ? 'from-hq' : 'from-leader'}">
+      <div class="message-sender">${m.from === 'hq' ? '🏛 HQ' : '👤 ' + m.leaderName}</div>
+      <div class="message-text">${m.text}</div>
+      <div class="message-time">${formatDate(m.createdAt)}</div>
+    </div>
+  `).join('');
+  thread.scrollTop = thread.scrollHeight;
+  // Mark unread as read
+  for (const msg of conv.messages.filter(m => m.from === 'leader' && !m.readByHQ)) {
+    await updateDoc(doc(db, 'messages', msg.id), { readByHQ: true });
+  }
+};
+
+window.openMessageToLeader = function(leaderUid, leaderName) {
+  activeThreadLeaderUid = leaderUid;
+  showPanel('messages');
+  setTimeout(() => {
+    if (allConversations[leaderUid]) {
+      openThread(leaderUid);
+    } else {
+      document.getElementById('active-thread-name').textContent = `New conversation with ${leaderName}`;
+      document.getElementById('active-thread').innerHTML = '<div class="empty-state"><div class="empty-icon">💬</div><p>Start this conversation</p></div>';
+      document.getElementById('reply-area').style.display = 'flex';
+    }
+  }, 200);
+};
+
+window.sendHQReply = async function() {
+  if (!activeThreadLeaderUid) return;
+  const input = document.getElementById('hq-msg-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  const conv = allConversations[activeThreadLeaderUid];
+  await addDoc(collection(db, 'messages'), {
+    leaderUid: activeThreadLeaderUid,
+    leaderName: conv?.leaderName || '',
+    networkName: conv?.networkName || '',
+    from: 'hq',
+    text,
+    createdAt: serverTimestamp(),
+    readByLeader: false,
+  });
+};
+
+window.handleHQMsgKey = function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendHQReply(); }
+};
+
+// ── ANNOUNCEMENTS ──
+function loadAnnouncements() {
+  const q = query(collection(db, 'announcements'), orderBy('createdAt', 'desc'));
+  onSnapshot(q, (snap) => {
+    const anns = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const el = document.getElementById('admin-announcements-list');
+    if (!anns.length) {
+      el.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><p>No announcements posted</p></div>';
+      return;
+    }
+    el.innerHTML = anns.map(a => `
+      <div style="padding:12px;border:1px solid rgba(201,146,42,0.1);border-radius:var(--radius);margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;justify-content:space-between">
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="ann-tag ${a.tag}">${a.tag}</span>
+            <span style="font-size:10px;color:var(--muted)">${formatDate(a.createdAt)}</span>
+          </div>
+          <button class="btn-sm danger" onclick="deleteAnnouncement('${a.id}')">Delete</button>
+        </div>
+        <div style="font-size:13px;color:var(--gold-pale);font-weight:700;margin-bottom:3px">${a.title}</div>
+        <div style="font-size:12px;color:var(--muted)">${a.body.substring(0,100)}...</div>
+      </div>
+    `).join('');
+  });
+}
+
+window.postAnnouncement = async function() {
+  const title = document.getElementById('ann-title').value.trim();
+  const body = document.getElementById('ann-body').value.trim();
+  if (!title || !body) { toast('Title and body are required', 'error'); return; }
+  const btn = document.getElementById('post-ann-btn');
+  btn.disabled = true; btn.textContent = 'Publishing...';
+  try {
+    await addDoc(collection(db, 'announcements'), {
+      title, body,
+      tag: document.getElementById('ann-tag').value,
+      audience: document.getElementById('ann-audience').value,
+      postedBy: currentAdmin.email,
+      createdAt: serverTimestamp(),
+    });
+    document.getElementById('ann-title').value = '';
+    document.getElementById('ann-body').value = '';
+    toast('Announcement published to all leaders!', 'success');
+  } catch(e) { toast('Failed to publish', 'error'); }
+  finally { btn.disabled = false; btn.textContent = 'Publish Announcement →'; }
+};
+
+window.deleteAnnouncement = async function(id) {
+  if (!confirm('Delete this announcement?')) return;
+  const { deleteDoc } = await import('https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js');
+  await deleteDoc(doc(db, 'announcements', id));
+  toast('Announcement deleted', 'info');
+};
+
+// ── PRAYER ──
+function loadPrayerRequests() {
+  const q = query(collection(db, 'prayer_requests'), orderBy('createdAt', 'desc'));
+  onSnapshot(q, (snap) => {
+    const prayers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const el = document.getElementById('admin-prayer-list');
+    if (!prayers.length) {
+      el.innerHTML = '<div class="empty-state"><div class="empty-icon">🙏</div><p>No prayer requests yet</p></div>';
+      return;
+    }
+    el.innerHTML = prayers.map(p => `
+      <div style="padding:12px;border:1px solid rgba(201,146,42,0.1);border-radius:var(--radius);margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+          <span style="font-size:10px;color:var(--gold);font-weight:700">${p.leaderName || 'Anonymous'}</span>
+          <span style="font-size:10px;color:var(--muted)">${p.networkName || ''}</span>
+          <span class="badge pending">${p.category}</span>
+          <span style="font-size:10px;color:var(--muted);margin-left:auto">${formatDate(p.createdAt)}</span>
+          ${p.visibility === 'hq' ? '<span class="badge inactive">Private</span>' : ''}
+        </div>
+        <p style="font-size:13px;color:var(--text);line-height:1.6">${p.text}</p>
+        <p style="font-size:11px;color:var(--muted);margin-top:6px">🙏 ${p.agreeCount||0} leaders agreeing in prayer</p>
+      </div>
+    `).join('');
+  });
+}
+
+// ── ACTIVITY LOG ──
+async function loadActivityLog() {
+  const q = query(collection(db, 'activity_log'), orderBy('createdAt', 'desc'), limit(50));
+  const snap = await getDocs(q);
+  const logs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const el = document.getElementById('activity-log');
+  if (!logs.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><p>No activity yet</p></div>';
+    return;
+  }
+  el.innerHTML = logs.map(l => `
+    <div style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid rgba(201,146,42,0.05)">
+      <span style="font-size:16px;flex-shrink:0">${l.type==='leader_created'?'👤':l.type==='report_reviewed'?'📋':'📌'}</span>
+      <div>
+        <div style="font-size:12px;color:var(--text)">${l.details}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px">${l.adminEmail} · ${formatDate(l.createdAt)}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── AUTH ──
+window.doLogin = async function() {
+  const email = document.getElementById('login-email').value.trim();
+  const pw = document.getElementById('login-password').value;
+  const btn = document.getElementById('login-btn');
+  const err = document.getElementById('auth-error');
+  err.style.display = 'none';
+  btn.disabled = true; btn.textContent = 'Signing in...';
+  try {
+    await signInWithEmailAndPassword(auth, email, pw);
+  } catch(e) {
+    err.style.display = 'block';
+    err.textContent = 'Invalid credentials. Admin access only.';
+    btn.disabled = false; btn.textContent = 'Access Admin Panel';
+  }
+};
+
+window.doLogout = async function() {
+  await signOut(auth);
+  location.reload();
+};
+
+window.refreshAll = function() {
+  loadOverview(); loadLeaders(); loadReports(); toast('Refreshed', 'info');
+};
+
+// ── MODAL ──
+window.closeModal = function(id) {
+  document.getElementById(id).classList.remove('open');
+  activeReportId = null;
+};
+
+// ── HELPERS ──
+window.showPanel = function(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const titles = {
+    overview: 'Network Overview', leaders: 'All Leaders', 'add-leader': 'Add New Leader',
+    reports: 'All Reports', messages: 'Messages', announcements: 'Post Announcement',
+    prayer: 'Prayer Requests', activity: 'Activity Log',
+  };
+  document.getElementById('topbar-title').textContent = titles[id] || id;
+};
+
+function formatDate(ts) {
+  if (!ts) return '–';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function initials(l) {
+  return ((l.firstName||'?')[0] + (l.lastName||'?')[0]).toUpperCase();
+}
+
+function toast(msg, type = 'info') {
+  const t = document.createElement('div');
+  t.className = `toast-item ${type}`;
+  t.innerHTML = `${type==='success'?'✓':type==='error'?'✕':'ℹ'} ${msg}`;
+  document.getElementById('toast').appendChild(t);
+  setTimeout(() => t.remove(), 4500);
+}
+
+document.getElementById('login-password').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+</script>
+</body>
+</html>
