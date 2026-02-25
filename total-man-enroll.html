@@ -423,49 +423,6 @@ body{font-family:'Lato',sans-serif;background:var(--deep);color:var(--text)}
   letter-spacing:0.1em;cursor:pointer;transition:color 0.2s;
 }
 .rskip:hover{color:var(--gold)}
-  /* ── PROFILE ACTIONS ── */
-.profile-actions{
-  max-width:470px;width:min(470px,88vw);
-  margin-bottom:16px;
-}
-.profile-actions-label{
-  font-size:9px;color:var(--gold);letter-spacing:0.28em;
-  text-transform:uppercase;text-align:center;
-  margin-bottom:12px;
-}
-.pa-grid{
-  display:grid;grid-template-columns:1fr 1fr;
-  gap:10px;
-}
-.pa-btn{
-  display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:8px;
-  padding:16px 12px;
-  background:rgba(255,255,255,0.02);
-  border:1px solid var(--dim);
-  border-radius:8px;cursor:pointer;
-  text-decoration:none;color:var(--text);
-  transition:all 0.25s;text-align:center;
-}
-.pa-btn:hover{
-  border-color:var(--gold);
-  background:rgba(201,146,42,0.06);
-  transform:translateY(-2px);
-}
-.pa-btn svg{
-  width:22px;height:22px;
-  flex-shrink:0;
-}
-.pa-btn-title{
-  font-family:'Cinzel',serif;font-size:11px;
-  color:var(--gold-p);letter-spacing:0.06em;line-height:1.3;
-}
-.pa-btn-sub{
-  font-size:10px;color:var(--muted);
-  line-height:1.4;
-}
-.pa-btn.gold-border{border-color:rgba(201,146,42,0.3)}
-.pa-btn.gold-border:hover{border-color:var(--gold-l)}
 .sl{font-size:12px;color:var(--muted);text-decoration:none;letter-spacing:0.1em;transition:color 0.2s}
 .sl:hover{color:var(--gold)}
 
@@ -693,59 +650,30 @@ body{font-family:'Lato',sans-serif;background:var(--deep);color:var(--text)}
     </div>
   </div>
 
+  <!-- RETURN MESSAGE for duplicate enrollees -->
+  <div id="return-msg" style="display:none;background:rgba(201,146,42,0.07);border:1px solid rgba(201,146,42,0.2);border-radius:8px;padding:14px 18px;margin-bottom:16px;text-align:center;max-width:470px;width:min(470px,88vw)">
+    <p style="font-family:'Cinzel',serif;font-size:13px;color:var(--gold-p);margin-bottom:4px">Welcome back ✦</p>
+    <p style="font-size:12px;color:var(--muted);line-height:1.6">This email is already enrolled. Here is your profile card.</p>
+  </div>
+
+  <!-- PROFILE URL — bookmark this -->
+  <div id="profile-url-box" style="display:none;background:rgba(255,255,255,0.02);border:1px solid var(--dim);border-radius:8px;padding:12px 16px;margin-bottom:16px;max-width:470px;width:min(470px,88vw);text-align:center">
+    <p style="font-size:9px;color:var(--gold);letter-spacing:0.25em;text-transform:uppercase;margin-bottom:6px">Your Profile Link — Bookmark This</p>
+    <p id="profile-url-text" style="font-size:11px;color:var(--muted);word-break:break-all;margin-bottom:8px;line-height:1.5"></p>
+    <button onclick="copyProfileUrl()" id="copy-profile-btn" style="background:transparent;border:1px solid rgba(201,146,42,0.25);border-radius:4px;padding:6px 16px;color:var(--gold);font-family:'Cinzel',serif;font-size:11px;letter-spacing:0.08em;cursor:pointer;transition:all 0.2s">
+      Copy Link
+    </button>
+    <p style="font-size:11px;color:var(--muted);margin-top:6px">Save this link to view your profile anytime</p>
+  </div>
+
   <div class="cacts">
-    <a href="https://chat.whatsapp.com/K29N9Q2UmI61xwqlCQAWKo" target="_blank" class="wa">
+    <a href="YOUR_WHATSAPP_GROUP_LINK_HERE" target="_blank" class="wa">
       <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zM12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.528 5.845L.057 23.998l6.306-1.652A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.007-1.371l-.36-.214-3.732.978 1-3.64-.235-.374A9.818 9.818 0 1112 21.818z"/></svg>
       Join the WhatsApp Group
     </a>
     <a href="https://lehemnetwork.org" class="sl">Return to LNI Global →</a>
   </div>
-  <!-- PROFILE ACTIONS -->
-<div class="profile-actions">
-  <p class="profile-actions-label">Your Journey Resources</p>
-  <div class="pa-grid">
 
-    <!-- Download Handbook -->
-    <a href="YOUR_HANDBOOK_PDF_LINK_HERE" target="_blank" class="pa-btn gold-border">
-      <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5">
-        <path d="M12 16L8 12m4 4l4-4m-4 4V4M4 20h16"/>
-      </svg>
-      <span class="pa-btn-title">Download Handbook</span>
-      <span class="pa-btn-sub">The Total Man Study Guide</span>
-    </a>
-
-    <!-- Download Workbook -->
-    <a href="YOUR_WORKBOOK_PDF_LINK_HERE" target="_blank" class="pa-btn gold-border">
-      <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5">
-        <path d="M9 12h6M9 16h6M9 8h6M5 3h14a1 1 0 011 1v16a1 1 0 01-1 1H5a1 1 0 01-1-1V4a1 1 0 011-1z"/>
-      </svg>
-      <span class="pa-btn-title">Download Workbook</span>
-      <span class="pa-btn-sub">100-Day Journal & Drills</span>
-    </a>
-
-    <!-- Join a Network -->
-    <a href="https://lehemnetwork.org/join-network" target="_blank" class="pa-btn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold-p)" stroke-width="1.5">
-        <circle cx="12" cy="8" r="3"/>
-        <circle cx="4" cy="18" r="2"/>
-        <circle cx="20" cy="18" r="2"/>
-        <path d="M12 11v3M12 14l-5 3M12 14l5 3"/>
-      </svg>
-      <span class="pa-btn-title">Join a Network</span>
-      <span class="pa-btn-sub">Find your local LNI chapter</span>
-    </a>
-
-    <!-- Pioneer a Network -->
-    <a href="https://lehemnetwork.org/pioneer-network" target="_blank" class="pa-btn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold-p)" stroke-width="1.5">
-        <path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/>
-      </svg>
-      <span class="pa-btn-title">Pioneer a Network</span>
-      <span class="pa-btn-sub">Start a chapter in your city</span>
-    </a>
-
-  </div>
-</div>
   <!-- REFERRAL -->
   <div class="rw" id="rw">
     <div class="rdiv">
@@ -764,47 +692,96 @@ body{font-family:'Lato',sans-serif;background:var(--deep);color:var(--text)}
       Not everyone will say yes. But the right ones will —
       and the journey becomes something else entirely when you do it together.
     </p>
-    <div id="rnames">
-      <p class="rnlabel">Who are your three?</p>
-      <div class="rninputs">
-        <input class="rni" id="rn1" type="text" placeholder="First person's name" autocomplete="off">
-        <input class="rni" id="rn2" type="text" placeholder="Second person's name" autocomplete="off">
-        <input class="rni" id="rn3" type="text" placeholder="Third person's name" autocomplete="off">
-      </div>
-      <button class="rgenbtn" onclick="genShare()">Generate My Invitation →</button>
-    </div>
-    <div class="rsharebox" id="rsbox" style="display:none">
-      <p class="rsharelabel">YOUR PERSONAL INVITATION</p>
-      <div class="rmsgbox" id="rmsg"></div>
-      <div class="rsharebts">
+    <!-- SINGLE INVITATION MESSAGE — they copy and forward themselves -->
+    <div class="rsharebox" id="rsbox">
+      <p class="rsharelabel">YOUR INVITATION TO FORWARD</p>
+      <p class="rnote" style="margin-bottom:12px;font-size:12px">
+        Copy this message. Send it to each friend individually on WhatsApp.
+        You can replace <strong style="color:var(--gold-p)">[Friend's name]</strong> with their actual name before sending.
+      </p>
+      <div class="rmsgbox" id="rmsg" style="background:rgba(0,0,0,0.25);border-radius:8px;padding:16px;font-size:13px;color:var(--text);line-height:1.8;text-align:left;white-space:pre-line;font-family:'Lato',sans-serif;margin-bottom:14px"></div>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:6px">
         <a class="rwabtn" id="rwabtn" href="#" target="_blank">
           <svg viewBox="0 0 24 24" fill="white" width="17" height="17"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zM12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.528 5.845L.057 23.998l6.306-1.652A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.007-1.371l-.36-.214-3.732.978 1-3.64-.235-.374A9.818 9.818 0 1112 21.818z"/></svg>
           Send on WhatsApp
         </a>
-        <button class="rcopybtn" id="rcpbtn" onclick="copyMsg()">Copy Message</button>
+        <button class="rcopybtn" id="rcpbtn" onclick="copyShareMsg()">Copy Message</button>
       </div>
-      <p class="rnote">Anyone who receives this link joins the same experience you just completed.</p>
+      <p class="rnote">Anyone who receives this link goes through the same experience you just completed.</p>
+
+      <!-- BIG JOIN COMMUNITY BANNER -->
+      <div class="join-community-banner">
+        <p class="jcb-label">Don't forget —</p>
+        <p class="jcb-heading">Join the WhatsApp Community</p>
+        <p class="jcb-sub">Daily reminders · Accountability · Prayer · 100 days together</p>
+        <a href="YOUR_WHATSAPP_GROUP_LINK_HERE" target="_blank" class="jcb-btn">
+          <svg viewBox="0 0 24 24" fill="white" width="22" height="22"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zM12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.528 5.845L.057 23.998l6.306-1.652A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.007-1.371l-.36-.214-3.732.978 1-3.64-.235-.374A9.818 9.818 0 1112 21.818z"/></svg>
+          Join the Total Man WhatsApp Group →
+        </a>
+      </div>
     </div>
     <p class="rskip" onclick="skipShare()">I will do this later →</p>
   </div>
 </div>
 
+<style>
+.person-share-card{
+  background:rgba(201,146,42,0.04);
+  border:1px solid rgba(201,146,42,0.18);
+  border-radius:8px;padding:14px 16px;
+  margin-bottom:10px;animation:fup 0.4s ease both;
+}
+.psc-name{
+  font-family:'Cinzel',serif;font-size:14px;
+  color:var(--gold-p);margin-bottom:10px;letter-spacing:0.05em;
+}
+.psc-btns{display:flex;gap:10px;align-items:center}
+.join-community-banner{
+  margin-top:20px;
+  background:linear-gradient(135deg,rgba(37,211,102,0.08),rgba(37,211,102,0.03));
+  border:1px solid rgba(37,211,102,0.3);
+  border-radius:10px;padding:22px 18px;text-align:center;
+}
+.jcb-label{
+  font-size:10px;color:rgba(37,211,102,0.7);
+  letter-spacing:0.25em;text-transform:uppercase;margin-bottom:6px;
+}
+.jcb-heading{
+  font-family:'Cinzel',serif;font-size:clamp(1rem,3.5vw,1.3rem);
+  color:#fff;margin-bottom:6px;font-weight:600;
+}
+.jcb-sub{
+  font-size:12px;color:rgba(255,255,255,0.45);
+  margin-bottom:18px;line-height:1.5;
+}
+.jcb-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  gap:10px;width:100%;padding:16px 18px;
+  background:#25D366;border:none;border-radius:8px;
+  color:white;font-family:'Cinzel',serif;
+  font-size:clamp(12px,3vw,14px);font-weight:700;
+  letter-spacing:0.08em;cursor:pointer;
+  text-decoration:none;transition:all 0.25s;
+  box-shadow:0 6px 24px rgba(37,211,102,0.3);
+}
+.jcb-btn:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(37,211,102,0.45)}
+</style>
+
 <!-- FIREBASE -->
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
-import{getFirestore,addDoc,collection,serverTimestamp}from'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
-
+import{getFirestore,addDoc,collection,serverTimestamp,getDocs,query,where}from'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
 const cfg={
-  apiKey:"AIzaSyDSTqQrkY5tiSPoNsE12VpFH-aiV-bD2sg",
-  authDomain:"lni-global.firebaseapp.com",
-  projectId:"lni-global",
-  storageBucket:"lni-global.firebasestorage.app",
-  messagingSenderId:"1011021757015",
-  appId:"1:1011021757015:web:e01c90d5c29925adf6c112"
+  apiKey:"YOUR_API_KEY",
+  authDomain:"YOUR_PROJECT_ID.firebaseapp.com",
+  projectId:"YOUR_PROJECT_ID",
+  storageBucket:"YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId:"YOUR_SENDER_ID",
+  appId:"YOUR_APP_ID"
 };
 const app=initializeApp(cfg);
 const db=getFirestore(app);
-window._db=db;window._add=addDoc;window._col=collection;window._ts=serverTimestamp;
+window._db=db;window._add=addDoc;window._col=collection;window._ts=serverTimestamp;window._getDocs=getDocs;window._query=query;window._where=where;
 </script>
 
 <script>
@@ -979,33 +956,120 @@ document.addEventListener('keydown',e=>{
   }
 });
 
-// SUBMIT + BUILD CARD
+// SUBMIT + BUILD CARD — with duplicate email check
 window.submitAndShow=async function(){
   if(!validate())return;
   collect();
 
+  // ── Check for duplicate email ──
+  const emailBtn=document.getElementById('bg-email');
+  const origText=emailBtn.innerHTML;
+  emailBtn.innerHTML='Checking...';emailBtn.classList.remove('on');
+
+  try{
+    const q=window._query(
+      window._col(window._db,'total_man_enrollments'),
+      window._where('email','==',A.email)
+    );
+    const existing=await window._getDocs(q);
+
+    if(!existing.empty){
+      // Already enrolled — load their existing profile
+      const data=existing.docs[0].data();
+      emailBtn.innerHTML=origText;emailBtn.classList.add('on');
+      showProfile(data, true); // true = returning enrollee
+      return;
+    }
+  }catch(e){
+    console.warn('Duplicate check failed, proceeding:',e);
+    emailBtn.innerHTML=origText;emailBtn.classList.add('on');
+  }
+
+  // ── New enrollee — create record ──
   const num=`#TM-2026-${String(Math.floor(Math.random()*9000)+1000)}`;
-  document.getElementById('cn').textContent=A.fn;
-  document.getElementById('cl').textContent=`${A.city}, ${A.country}`;
-  document.getElementById('cph').textContent=A.pp||'—';
-  const intText=A.intent.length>110?A.intent.slice(0,107)+'…':A.intent;
-  document.getElementById('cint').textContent=intText||'—';
-  document.getElementById('cno').textContent=num;
+  const profileData={
+    firstName:A.fn,city:A.city,country:A.country,
+    email:A.email,spiritualState:A.ss,phasePull:A.pp,
+    intention:A.intent,source:A.src,
+    enrollNumber:num,covenantSigned:true,
+    referredBy:new URLSearchParams(location.search).get('ref')||'',
+    journeyStart:'22 March 2026',journeyEnd:'30 June 2026',
+  };
 
   try{
     await window._add(window._col(window._db,'total_man_enrollments'),{
-      firstName:A.fn,city:A.city,country:A.country,
-      email:A.email,spiritualState:A.ss,phasePull:A.pp,
-      intention:A.intent,source:A.src,
-      enrollNumber:num,covenantSigned:true,
-      referredBy:new URLSearchParams(location.search).get('ref')||'',
-      journeyStart:'22 March 2026',journeyEnd:'30 June 2026',
-      enrolledAt:window._ts(),
+      ...profileData,enrolledAt:window._ts(),
     });
   }catch(e){console.warn('Save:',e);}
 
-  burst();setTimeout(()=>goTo(SCENES.indexOf('sc')),420);
+  // Save to localStorage so they can return
+  try{localStorage.setItem('lni_tm_profile',JSON.stringify({...profileData,savedAt:new Date().toISOString()}));}catch(e){}
+
+  showProfile(profileData, false);
 };
+
+function showProfile(data, returning){
+  A.fn=data.firstName||A.fn;
+  A.city=data.city||A.city;
+  A.country=data.country||A.country;
+  A.pp=data.phasePull||A.pp;
+  A.intent=data.intention||A.intent;
+
+  document.getElementById('cn').textContent=data.firstName;
+  document.getElementById('cl').textContent=`${data.city}, ${data.country}`;
+  document.getElementById('cph').textContent=data.phasePull||'—';
+  const intText=(data.intention||'').length>110?(data.intention||'').slice(0,107)+'…':(data.intention||'—');
+  document.getElementById('cint').textContent=intText;
+  document.getElementById('cno').textContent=data.enrollNumber;
+
+  // Show profile URL they can bookmark
+  const profileUrl=`${location.origin}${location.pathname}?view=${encodeURIComponent(data.enrollNumber)}`;
+  const profileBox=document.getElementById('profile-url-box');
+  if(profileBox){
+    document.getElementById('profile-url-text').textContent=profileUrl;
+    profileBox.style.display='block';
+  }
+
+  // If returning — show a gentle message
+  if(returning){
+    const returnMsg=document.getElementById('return-msg');
+    if(returnMsg)returnMsg.style.display='block';
+    // Hide referral section for returning users
+    const rw=document.getElementById('rw');
+    if(rw)rw.style.display='none';
+  }
+
+  // Auto-populate share message
+  setTimeout(()=>{ if(typeof genShare==='function')genShare(); },800);
+
+  burst();setTimeout(()=>goTo(SCENES.indexOf('sc')),420);
+}
+
+// ── Load profile from URL ?view=TM-2026-XXXX ──
+async function checkViewParam(){
+  const params=new URLSearchParams(location.search);
+  const viewNum=params.get('view');
+  if(!viewNum)return;
+  // Skip straight to card scene, load data
+  try{
+    const q=window._query(
+      window._col(window._db,'total_man_enrollments'),
+      window._where('enrollNumber','==',viewNum)
+    );
+    const snap=await window._getDocs(q);
+    if(!snap.empty){
+      const data=snap.docs[0].data();
+      // Hide all scenes, show card
+      SCENES.forEach(s=>document.getElementById(s).classList.remove('active'));
+      document.getElementById('sc').classList.add('active');
+      showProfile(data,false);
+      document.getElementById('prog').classList.remove('show');
+      document.getElementById('nav').classList.remove('show');
+    }
+  }catch(e){console.warn('View load failed:',e);}
+}
+// Run after Firebase is ready
+setTimeout(checkViewParam,1200);
 
 // 3D CARD
 const pc=document.getElementById('pc');
@@ -1016,52 +1080,86 @@ pc.addEventListener('mousemove',e=>{
 });
 pc.addEventListener('mouseleave',()=>pc.style.transform='rotateY(0) rotateX(0)');
 
-// REFERRAL
-window.genShare=function(){
-  const n1=document.getElementById('rn1').value.trim();
-  const n2=document.getElementById('rn2').value.trim();
-  const n3=document.getElementById('rn3').value.trim();
-  const named=[n1,n2,n3].filter(Boolean);
+// REFERRAL — single message, user edits name and forwards themselves
+function buildShareMsg(){
   const num=document.getElementById('cno').textContent;
   const pageUrl=`${location.origin}${location.pathname}?ref=${encodeURIComponent(A.fn)}`;
-  const greeting=n1||'Friend';
+  return `[Friend's name],
 
-  const msg=`${greeting},\n\nI just enrolled in something I believe could change everything — The Total Man, a 100-day discipleship journey with Lehem Network International, starting 22nd March 2026.\n\n100 days. Spirit. Mind. Body. Authority. Legacy.\n\nI thought of you specifically when I finished. Not everyone gets invited. I am inviting you because I don't want to do this alone — and I believe you are ready.\n\nEnrol here:\n${pageUrl}\n\n— ${A.fn} (${num})\n\n"As iron sharpens iron, so one man sharpens another." — Prov 27:17`;
+I just enrolled in something I believe could change everything — The Total Man, a 100-day discipleship journey with Lehem Network International, starting 22nd March 2026.
 
-  document.getElementById('rmsg').textContent=msg;
-  document.getElementById('rnames').style.display='none';
-  document.getElementById('rsbox').style.display='block';
-  document.getElementById('rwabtn').href=`https://wa.me/?text=${encodeURIComponent(msg)}`;
+100 days. Spirit. Mind. Body. Authority. Legacy.
 
+I thought of you specifically when I finished. Not everyone gets invited. I am inviting you because I don’t want to do this alone — and I believe you are ready.
+
+Enrol here:
+${pageUrl}
+
+— ${A.fn} (${num})
+
+“As iron sharpens iron, so one man sharpens another.” — Prov 27:17`;
+}
+
+// Auto-populate the message box whenever the card scene is shown
+window.genShare=function(){
+  const msg=buildShareMsg();
+  const msgEl=document.getElementById('rmsg');
+  const waBtn=document.getElementById('rwabtn');
+  if(msgEl)msgEl.textContent=msg;
+  if(waBtn)waBtn.href=`https://wa.me/?text=${encodeURIComponent(msg)}`;
   try{
     if(window._add&&window._col&&window._db){
       window._add(window._col(window._db,'referrals'),{
-        referrerName:A.fn,referrerNumber:num,invitedNames:named,
+        referrerName:A.fn,
+        referrerNumber:document.getElementById('cno').textContent,
         createdAt:window._ts?window._ts():new Date().toISOString(),
       });
     }
   }catch(e){}
 };
 
-window.copyMsg=function(){
-  navigator.clipboard.writeText(document.getElementById('rmsg').textContent).then(()=>{
-    const b=document.getElementById('rcpbtn');
-    b.textContent='✓ Copied';b.classList.add('copied');
-    setTimeout(()=>{b.textContent='Copy Message';b.classList.remove('copied')},2500);
-  });
-};
-  
-window.openSharePanel=function(){
-  // Scroll down to the referral section and reveal it
-  const rw=document.getElementById('rw');
-  if(rw){
-    rw.style.display='block';
-    rw.style.opacity='1';
-    setTimeout(()=>rw.scrollIntoView({behavior:'smooth',block:'start'}),100);
-    if(typeof genShare==='function')genShare();
+// Robust clipboard copy — works on all mobile browsers
+function robustCopy(text,btn,label){
+  label=label||'Copy';
+  function fallback(){
+    try{
+      const ta=document.createElement('textarea');
+      ta.value=text;
+      ta.style.cssText='position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;font-size:16px';
+      document.body.appendChild(ta);ta.focus();ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      btn.textContent='✓ Copied';btn.classList.add('copied');
+      setTimeout(()=>{btn.textContent=label;btn.classList.remove('copied');},2600);
+    }catch(e){
+      btn.textContent='Long-press to copy';
+      setTimeout(()=>{btn.textContent=label;},3000);
+    }
   }
+  if(navigator.clipboard&&window.isSecureContext){
+    navigator.clipboard.writeText(text)
+      .then(()=>{
+        btn.textContent='✓ Copied';btn.classList.add('copied');
+        setTimeout(()=>{btn.textContent=label;btn.classList.remove('copied');},2600);
+      })
+      .catch(fallback);
+  }else{
+    fallback();
+  }
+}
+
+window.copyShareMsg=function(){
+  const msg=document.getElementById('rmsg').textContent;
+  const btn=document.getElementById('rcpbtn');
+  if(msg&&btn)robustCopy(msg,btn,'Copy Message');
 };
-  
+
+window.copyProfileUrl=function(){
+  const url=document.getElementById('profile-url-text').textContent;
+  const btn=document.getElementById('copy-profile-btn');
+  if(url&&btn)robustCopy(url,btn,'Copy Link');
+};
+
 window.skipShare=function(){
   const rw=document.getElementById('rw');
   rw.style.opacity='0';
