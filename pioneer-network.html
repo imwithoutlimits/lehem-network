@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pioneer a Network — LNI Global</title>
+<meta property="og:title" content="Pioneer an LNI Network — Lehem Network International">
+<meta property="og:description" content="Start a chapter in your city. This is not for everyone. But it might be for you.">
+<meta property="og:image" content="https://lehemnetwork.org/lni-og-image.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Cinzel:wght@400;600;700&family=Lato:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#060404;--bark:#160C08;--dim:#2A1810;--rim:#3E2418;
+  --fire:#C9460A;--gold:#C9922A;--gold-l:#E8B84B;--gold-p:#F5DFA0;
+  --text:#EAD8C0;--muted:#7A5A40;--soft:#B89878;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden}
+body{font-family:'Lato',sans-serif;background:var(--ink);color:var(--text)}
+
+#cv{position:fixed;inset:0;pointer-events:none;z-index:0}
+
+.scene{
+  position:fixed;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:60px 24px 80px;z-index:10;
+  opacity:0;pointer-events:none;transition:opacity 0.85s ease;
+}
+.scene.active{opacity:1;pointer-events:all}
+
+#prog{position:fixed;top:24px;left:50%;transform:translateX(-50%);
+  z-index:100;display:flex;align-items:center;gap:8px;
+  opacity:0;transition:opacity 0.5s}
+#prog.show{opacity:1}
+.pd{width:6px;height:6px;border-radius:50%;background:var(--dim);transition:all 0.4s}
+.pd.done{background:var(--gold-l)}
+.pd.now{background:var(--gold);transform:scale(1.6);box-shadow:0 0 8px rgba(201,146,42,0.5)}
+
+#nav{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  z-index:100;opacity:0;transition:opacity 0.5s}
+#nav.show{opacity:1}
+.nbtn{background:transparent;border:1px solid var(--dim);border-radius:30px;
+  padding:8px 22px;color:var(--muted);font-family:'Lato',sans-serif;
+  font-size:12px;letter-spacing:0.08em;cursor:pointer;transition:all 0.2s}
+.nbtn:hover{border-color:var(--gold);color:var(--gold)}
+
+#burst{position:fixed;inset:0;pointer-events:none;z-index:200;
+  display:flex;align-items:center;justify-content:center;opacity:0}
+.bsym{font-family:'Cinzel',serif;font-size:8rem;color:var(--gold);
+  text-shadow:0 0 60px rgba(201,146,42,0.9);opacity:0;transform:scale(0.3)}
+@keyframes bpop{0%{opacity:0;transform:scale(0.3)}40%{opacity:0.6;transform:scale(1.1)}100%{opacity:0;transform:scale(2)}}
+.bsym.go{animation:bpop 0.6s ease forwards}
+
+/* INTRO — more dramatic than Join */
+#si{text-align:center}
+.i-lni{font-size:10px;color:var(--gold);letter-spacing:0.4em;text-transform:uppercase;
+  margin-bottom:20px;opacity:0;animation:fup 1s 0.4s ease forwards}
+.i-warning{font-family:'Cinzel',serif;font-size:11px;color:var(--fire);
+  letter-spacing:0.2em;text-transform:uppercase;
+  border:1px solid rgba(201,70,10,0.3);border-radius:2px;
+  padding:6px 16px;display:inline-block;margin-bottom:24px;
+  opacity:0;animation:fup 1s 0.8s ease forwards}
+.i-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2.8rem,9vw,6.5rem);
+  color:var(--gold-p);line-height:0.95;font-weight:700;
+  opacity:0;animation:fup 1s 1.2s ease forwards;
+  text-shadow:0 0 100px rgba(201,146,42,0.2)}
+.i-title em{color:var(--gold);font-style:italic;display:block}
+.i-sub{font-size:clamp(0.85rem,2.2vw,1.1rem);color:var(--muted);
+  margin-top:18px;font-weight:300;max-width:480px;line-height:1.65;
+  opacity:0;animation:fup 1s 1.9s ease forwards}
+.i-btn{margin-top:44px;padding:16px 52px;background:transparent;
+  border:1px solid rgba(201,146,42,0.4);border-radius:2px;
+  color:var(--gold-p);font-family:'Cinzel',serif;font-size:13px;
+  letter-spacing:0.22em;cursor:pointer;transition:all 0.4s;
+  position:relative;overflow:hidden;
+  opacity:0;animation:fup 1s 2.6s ease forwards}
+.i-btn::before{content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,var(--gold),var(--gold-l));
+  transform:scaleX(0);transform-origin:left;transition:transform 0.4s;z-index:-1}
+.i-btn:hover{color:var(--ink);border-color:var(--gold)}
+.i-btn:hover::before{transform:scaleX(1)}
+
+/* COST SCENE — what pioneering actually costs */
+.cost-wrap{max-width:620px;width:100%;text-align:center;overflow-y:auto;max-height:80vh}
+.cost-tag{font-size:10px;color:var(--fire);letter-spacing:0.35em;
+  text-transform:uppercase;margin-bottom:18px;
+  opacity:0;transition:opacity 0.6s 0.2s}
+.scene.active .cost-tag{opacity:1}
+.cost-heading{font-family:'Cormorant Garamond',serif;font-size:clamp(1.5rem,4.5vw,2.4rem);
+  color:var(--gold-p);line-height:1.2;margin-bottom:22px;font-weight:700;
+  opacity:0;transform:translateY(20px);transition:all 0.7s 0.35s}
+.scene.active .cost-heading{opacity:1;transform:translateY(0)}
+.cost-items{display:flex;flex-direction:column;gap:12px;margin-bottom:24px;
+  opacity:0;transform:translateY(14px);transition:all 0.7s 0.55s;text-align:left}
+.scene.active .cost-items{opacity:1;transform:translateY(0)}
+.cost-item{display:flex;align-items:flex-start;gap:14px;
+  background:rgba(255,255,255,0.02);border:1px solid var(--dim);
+  border-radius:6px;padding:14px 16px}
+.cost-icon{font-size:16px;min-width:22px;text-align:center;margin-top:1px}
+.cost-item-body{}
+.cost-item-title{font-family:'Cinzel',serif;font-size:12px;color:var(--gold-p);
+  letter-spacing:0.04em;margin-bottom:3px}
+.cost-item-text{font-size:12px;color:var(--muted);line-height:1.6;font-weight:300}
+
+.affirm-wrap{background:rgba(201,146,42,0.04);border:1px solid rgba(201,146,42,0.15);
+  border-radius:8px;padding:18px 20px;margin-top:4px;
+  display:flex;align-items:flex-start;gap:14px;cursor:pointer;
+  transition:all 0.3s;
+  opacity:0;transition:opacity 0.6s 1.1s,all 0.3s}
+.scene.active .affirm-wrap{opacity:1}
+.affirm-wrap:hover{border-color:var(--gold);background:rgba(201,146,42,0.07)}
+.affirm-wrap.checked{border-color:var(--gold-l);background:rgba(201,146,42,0.08)}
+.affirm-box{width:18px;height:18px;flex-shrink:0;border:1px solid var(--rim);
+  border-radius:3px;background:transparent;margin-top:2px;
+  display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+.affirm-wrap.checked .affirm-box{background:var(--gold);border-color:var(--gold)}
+.affirm-box svg{width:10px;height:10px;display:none}
+.affirm-wrap.checked .affirm-box svg{display:block}
+.affirm-text{font-size:12px;color:var(--soft);line-height:1.7;font-style:italic}
+
+.cost-continue{margin-top:18px;padding:13px 34px;
+  background:linear-gradient(135deg,var(--gold),var(--gold-l));
+  border:none;border-radius:3px;color:var(--ink);
+  font-family:'Cinzel',serif;font-size:12px;font-weight:700;
+  letter-spacing:0.15em;cursor:pointer;
+  opacity:0;transition:opacity 0.4s,transform 0.3s,box-shadow 0.3s;
+  box-shadow:0 6px 24px rgba(201,146,42,0.2)}
+.cost-continue.show{opacity:1}
+.cost-continue:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(201,146,42,0.35)}
+
+/* Q SCENES */
+.qs{text-align:center;max-width:680px;width:100%}
+.qctx{font-size:10px;color:var(--gold);letter-spacing:0.3em;
+  text-transform:uppercase;margin-bottom:14px;
+  opacity:0;transition:opacity 0.6s 0.1s}
+.scene.active .qctx{opacity:1}
+.qq{font-family:'Cormorant Garamond',serif;
+  font-size:clamp(1.4rem,4.5vw,2.4rem);
+  color:var(--gold-p);line-height:1.3;margin-bottom:10px;font-weight:600;
+  opacity:0;transform:translateY(22px);transition:all 0.7s 0.25s}
+.scene.active .qq{opacity:1;transform:translateY(0)}
+.qh{font-size:13px;color:var(--muted);font-style:italic;
+  margin-bottom:34px;opacity:0;transition:opacity 0.6s 0.45s}
+.scene.active .qh{opacity:1}
+
+.qiw{position:relative;max-width:440px;margin:0 auto;
+  opacity:0;transform:translateY(12px);transition:all 0.6s 0.5s}
+.scene.active .qiw{opacity:1;transform:translateY(0)}
+.qi{width:100%;background:transparent;border:none;
+  border-bottom:1px solid var(--dim);padding:13px 0;
+  color:var(--text);font-family:'Lato',sans-serif;
+  font-size:clamp(1rem,2.8vw,1.4rem);font-weight:300;
+  text-align:center;outline:none;transition:border-color 0.3s;caret-color:var(--gold)}
+.qi:focus{border-bottom-color:var(--gold)}
+.qi::placeholder{color:var(--muted);font-style:italic}
+.qul{position:absolute;bottom:0;left:50%;width:0;height:1px;
+  background:var(--gold);transform:translateX(-50%);transition:width 0.4s}
+.qi:focus~.qul{width:100%}
+
+.qgo{display:inline-flex;align-items:center;gap:10px;
+  background:transparent;border:none;color:var(--gold);
+  font-family:'Cinzel',serif;font-size:12px;letter-spacing:0.15em;
+  cursor:pointer;margin-top:28px;padding:8px 14px;
+  opacity:0;transition:opacity 0.4s,color 0.2s}
+.qgo.on{opacity:1}
+.qgo:hover{color:var(--gold-l)}
+.qgo svg{width:16px;height:16px;transition:transform 0.2s}
+.qgo:hover svg{transform:translateX(4px)}
+.etip{display:block;font-size:11px;color:var(--muted);
+  letter-spacing:0.06em;margin-top:7px;opacity:0;transition:opacity 0.4s}
+.etip.on{opacity:1}
+
+.cg{display:grid;gap:9px;max-width:640px;margin:0 auto;
+  opacity:0;transform:translateY(12px);transition:all 0.6s 0.5s}
+.scene.active .cg{opacity:1;transform:translateY(0)}
+.cg.c2{grid-template-columns:1fr 1fr}
+.ch{background:rgba(255,255,255,0.02);border:1px solid var(--dim);
+  border-radius:6px;padding:15px 18px;cursor:pointer;
+  transition:all 0.25s;text-align:left;position:relative;overflow:hidden}
+.ch::before{content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(201,146,42,0.06),transparent);
+  opacity:0;transition:opacity 0.3s}
+.ch:hover{border-color:var(--gold);transform:translateY(-2px)}
+.ch:hover::before{opacity:1}
+.ch.sel{border-color:var(--gold-l);background:rgba(201,146,42,0.07)}
+.ch.sel::after{content:'✦';position:absolute;top:11px;right:12px;color:var(--gold);font-size:10px}
+.chm{font-family:'Cinzel',serif;font-size:12px;color:var(--gold-p);letter-spacing:0.03em}
+.chs{font-size:12px;color:var(--muted);font-weight:300;margin-top:3px}
+
+/* VISION TEXTAREA */
+.qtarea{width:100%;background:transparent;border:none;
+  border-bottom:1px solid var(--dim);padding:13px 0;
+  color:var(--text);font-family:'Lato',sans-serif;
+  font-size:1rem;font-weight:300;line-height:1.7;
+  outline:none;resize:none;transition:border-color 0.3s;caret-color:var(--gold)}
+.qtarea:focus{border-bottom-color:var(--gold)}
+.qtarea::placeholder{color:var(--muted);font-style:italic}
+
+/* SCRIPTURE */
+.sw{text-align:center;max-width:560px}
+.st{font-family:'Cormorant Garamond',serif;
+  font-size:clamp(1.1rem,3vw,1.6rem);color:var(--text);
+  line-height:1.75;font-style:italic;
+  opacity:0;transform:translateY(18px);transition:all 0.9s 0.3s}
+.scene.active .st{opacity:1;transform:translateY(0)}
+.sr{margin-top:16px;font-size:11px;color:var(--gold);letter-spacing:0.18em;
+  opacity:0;transition:opacity 0.6s 1.3s}
+.scene.active .sr{opacity:1}
+.sb{margin-top:40px;padding:12px 32px;background:transparent;
+  border:1px solid rgba(201,146,42,0.2);border-radius:2px;
+  color:var(--gold);font-family:'Cinzel',serif;font-size:11px;
+  letter-spacing:0.18em;cursor:pointer;
+  opacity:0;transition:opacity 0.6s 2s,all 0.3s}
+.scene.active .sb{opacity:1}
+.sb:hover{background:rgba(201,146,42,0.07);border-color:var(--gold)}
+
+/* CONFIRMATION */
+#sc{overflow-y:auto;padding:30px 20px 50px;align-items:center}
+.conf-card{max-width:460px;width:min(460px,88vw);
+  background:linear-gradient(145deg,#1A1008,#0E0804);
+  border:1px solid var(--gold);border-radius:12px;padding:32px;
+  position:relative;overflow:hidden;
+  box-shadow:0 0 0 1px rgba(201,146,42,0.08),
+    0 20px 60px rgba(0,0,0,0.9),
+    inset 0 1px 0 rgba(201,146,42,0.1);
+  opacity:0;transform:translateY(20px);transition:all 0.8s 0.3s}
+.scene.active .conf-card{opacity:1;transform:translateY(0)}
+.conf-card::before{content:'';position:absolute;top:-40px;right:-40px;
+  width:150px;height:150px;
+  background:radial-gradient(circle,rgba(201,146,42,0.08),transparent 70%)}
+.conf-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.conf-lni{font-family:'Cinzel',serif;font-size:10px;color:var(--gold);letter-spacing:0.2em}
+.conf-type{font-size:10px;color:var(--muted);letter-spacing:0.12em}
+.conf-div{height:1px;background:linear-gradient(90deg,var(--gold),transparent);margin-bottom:16px}
+.conf-title{font-family:'Cormorant Garamond',serif;font-size:clamp(1.2rem,4vw,1.7rem);
+  color:var(--gold-p);margin-bottom:4px;font-weight:700}
+.conf-sub{font-size:12px;color:var(--muted);margin-bottom:18px;letter-spacing:0.05em}
+.conf-msg{font-size:13px;color:var(--soft);line-height:1.75;font-style:italic;
+  border-left:2px solid var(--gold);padding-left:12px;margin-bottom:20px;text-align:left}
+.conf-steps{text-align:left}
+.conf-step{display:flex;align-items:flex-start;gap:10px;
+  padding:10px 0;border-bottom:1px solid var(--dim)}
+.conf-step:last-child{border-bottom:none}
+.conf-step-num{font-family:'Cinzel',serif;font-size:11px;color:var(--gold);min-width:18px;margin-top:1px}
+.conf-step-text{font-size:12px;color:var(--soft);line-height:1.6}
+
+.conf-actions{display:flex;flex-direction:column;align-items:center;gap:12px;
+  margin-top:22px;opacity:0;transition:opacity 0.6s 1.2s}
+.scene.active .conf-actions{opacity:1}
+.wa-btn{display:inline-flex;align-items:center;gap:10px;
+  padding:13px 30px;background:#25D366;border:none;border-radius:6px;
+  color:white;font-family:'Cinzel',serif;font-size:12px;font-weight:700;
+  letter-spacing:0.06em;cursor:pointer;text-decoration:none;
+  transition:all 0.25s;box-shadow:0 6px 20px rgba(37,211,102,0.2)}
+.wa-btn:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(37,211,102,0.35)}
+.wa-btn svg{width:18px;height:18px;fill:white;flex-shrink:0}
+.back-link{font-size:11px;color:var(--muted);text-decoration:none;
+  letter-spacing:0.1em;transition:color 0.2s}
+.back-link:hover{color:var(--gold)}
+
+@keyframes fup{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:580px){.cg.c2{grid-template-columns:1fr}.cost-item{flex-direction:column;gap:8px}}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div id="prog"></div>
+<div id="burst"><div class="bsym">✦</div></div>
+<div id="nav"><button class="nbtn" onclick="goBack()">← Back</button></div>
+
+<!-- INTRO — heavier tone -->
+<div class="scene active" id="si">
+  <p class="i-lni">Lehem Network International</p>
+  <p class="i-warning">Not for everyone</p>
+  <h1 class="i-title">Pioneer<br><em>a Network</em></h1>
+  <p class="i-sub">Starting a network means becoming the man who gathers men. Before you go further — understand what that requires.</p>
+  <button class="i-btn" onclick="begin()">I WANT TO KNOW MORE &nbsp;→</button>
+</div>
+
+<!-- COST OF PIONEERING -->
+<div class="scene" id="s-cost" style="overflow-y:auto;padding:50px 24px">
+  <div class="cost-wrap">
+    <p class="cost-tag">The cost of pioneering</p>
+    <h2 class="cost-heading">What this will actually require of you</h2>
+    <div class="cost-items">
+      <div class="cost-item">
+        <span class="cost-icon">🔥</span>
+        <div class="cost-item-body">
+          <div class="cost-item-title">You must be the example</div>
+          <div class="cost-item-text">You cannot lead men into something you are not living yourself. Before your network has a single member, you are already the standard.</div>
+        </div>
+      </div>
+      <div class="cost-item">
+        <span class="cost-icon">⏱</span>
+        <div class="cost-item-body">
+          <div class="cost-item-title">Consistent time commitment</div>
+          <div class="cost-item-text">Gathering men regularly — weekly or fortnightly. Planning sessions. Following up on the ones who are struggling. This is a long-term investment.</div>
+        </div>
+      </div>
+      <div class="cost-item">
+        <span class="cost-icon">📞</span>
+        <div class="cost-item-body">
+          <div class="cost-item-title">Pastoral responsibility</div>
+          <div class="cost-item-text">Men will come to you with real problems. You will need to care, to listen, to point them to God — and to know when to call for help.</div>
+        </div>
+      </div>
+      <div class="cost-item">
+        <span class="cost-icon">🌍</span>
+        <div class="cost-item-body">
+          <div class="cost-item-title">Vision for your city</div>
+          <div class="cost-item-text">A pioneer sees beyond the room. You are not just running a meeting — you are planting something that will outlast you in your city.</div>
+        </div>
+      </div>
+    </div>
+    <div class="affirm-wrap" id="affirm" onclick="toggleAffirm()">
+      <div class="affirm-box">
+        <svg viewBox="0 0 10 8" fill="none" stroke="white" stroke-width="2"><path d="M1 4l3 3 5-6"/></svg>
+      </div>
+      <p class="affirm-text">"I have read and understood the cost of pioneering. I am not looking to run a programme. I am willing to become the man this requires."</p>
+    </div>
+    <button class="cost-continue" id="cost-btn" onclick="next()">I Accept This — Continue &nbsp;→</button>
+  </div>
+</div>
+
+<!-- Q1: NAME -->
+<div class="scene qs" id="s-name">
+  <p class="qctx">Let us begin</p>
+  <h2 class="qq">What is your first name?</h2>
+  <p class="qh">The name your network will be built around.</p>
+  <div class="qiw">
+    <input class="qi" id="fn" type="text" placeholder="Your first name" autocomplete="off" autocapitalize="words">
+    <div class="qul"></div>
+  </div>
+  <button class="qgo" id="bg-name" onclick="next()">
+    That is who I am
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+  </button>
+  <span class="etip" id="et-name">Press Enter to continue</span>
+</div>
+
+<!-- Q2: LOCATION -->
+<div class="scene qs" id="s-loc">
+  <p class="qctx">Your territory</p>
+  <h2 class="qq" id="q-loc-h">Which city are you pioneering in?</h2>
+  <p class="qh">This becomes your mission field.</p>
+  <div class="qiw" style="display:flex;flex-direction:column;gap:16px;max-width:440px;margin:0 auto">
+    <div style="position:relative">
+      <input class="qi" id="cy" type="text" placeholder="City" autocomplete="off">
+      <div class="qul"></div>
+    </div>
+    <div style="position:relative">
+      <input class="qi" id="co" type="text" placeholder="Country" autocomplete="off">
+      <div class="qul"></div>
+    </div>
+  </div>
+  <button class="qgo" id="bg-loc" onclick="next()">
+    This is my city
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+  </button>
+  <span class="etip" id="et-loc">Press Enter to continue</span>
+</div>
+
+<!-- Q3: EMAIL -->
+<div class="scene qs" id="s-email">
+  <p class="qctx">Stay connected</p>
+  <h2 class="qq" id="q-email-h">Your email address</h2>
+  <p class="qh">An LNI leader will be in touch with you personally.</p>
+  <div class="qiw">
+    <input class="qi" id="em" type="email" placeholder="your@email.com" autocomplete="off">
+    <div class="qul"></div>
+  </div>
+  <button class="qgo" id="bg-email" onclick="next()">
+    Continue
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+  </button>
+  <span class="etip" id="et-email">Press Enter to continue</span>
+</div>
+
+<!-- Q4: WHATSAPP -->
+<div class="scene qs" id="s-phone">
+  <p class="qctx">Direct contact</p>
+  <h2 class="qq" id="q-phone-h">Your WhatsApp number</h2>
+  <p class="qh">LNI leadership will reach out to you directly on this number.</p>
+  <div class="qiw">
+    <input class="qi" id="ph" type="tel" placeholder="+234 800 000 0000" autocomplete="off">
+    <div class="qul"></div>
+  </div>
+  <button class="qgo" id="bg-phone" onclick="next()">
+    Continue
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+  </button>
+  <span class="etip" id="et-phone">Press Enter to continue</span>
+</div>
+
+<!-- Q5: HOW MANY MEN -->
+<div class="scene qs" id="s-gather">
+  <p class="qctx">Honestly speaking</p>
+  <h2 class="qq" id="q-gather-h">How many men could you realistically gather?</h2>
+  <p class="qh">Not the number you hope for. The number you can call right now.</p>
+  <div class="cg c2" id="cg-gather">
+    <div class="ch" onclick="pick(this,'gather','2 to 5 men')">
+      <div class="chm">2 — 5 men</div>
+      <div class="chs">Starting small. This is where most great things begin.</div>
+    </div>
+    <div class="ch" onclick="pick(this,'gather','6 to 10 men')">
+      <div class="chm">6 — 10 men</div>
+      <div class="chs">A solid foundation to build from.</div>
+    </div>
+    <div class="ch" onclick="pick(this,'gather','11 to 20 men')">
+      <div class="chm">11 — 20 men</div>
+      <div class="chs">Strong network territory. You have been preparing.</div>
+    </div>
+    <div class="ch" onclick="pick(this,'gather','20+ men')">
+      <div class="chm">20+ men</div>
+      <div class="chs">This is a movement. Let us talk.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Q6: VISION -->
+<div class="scene qs" id="s-vision">
+  <p class="qctx">The most important question</p>
+  <h2 class="qq" id="q-vision-h">What is your vision for your city?</h2>
+  <p class="qh">Not a plan. A picture. What do you see when you close your eyes and imagine what God wants to do through this network?</p>
+  <div class="qiw" style="max-width:520px">
+    <textarea class="qtarea qi" id="vis" rows="4"
+      placeholder="Write it. Don't be small about it."></textarea>
+    <div class="qul"></div>
+  </div>
+  <button class="qgo" id="bg-vision" onclick="next()">
+    This is my vision
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+  </button>
+</div>
+
+<!-- SCRIPTURE -->
+<div class="scene" id="ss1">
+  <div class="sw">
+    <p class="st">"The things you have heard me say in the presence of many witnesses entrust to reliable men who will also be qualified to teach others."</p>
+    <p class="sr">— 2 Timothy 2:2</p>
+    <button class="sb" onclick="submitAndShow()">Submit My Interest &nbsp;→</button>
+  </div>
+</div>
+
+<!-- CONFIRMATION -->
+<div class="scene" id="sc" style="overflow-y:auto;padding:30px 20px 50px">
+  <div class="conf-card">
+    <div class="conf-top">
+      <span class="conf-lni">LNI GLOBAL</span>
+      <span class="conf-type">PIONEER INTEREST</span>
+    </div>
+    <div class="conf-div"></div>
+    <div class="conf-title" id="c-title">—</div>
+    <div class="conf-sub" id="c-loc">—</div>
+    <div class="conf-msg">
+      Your interest has been received and noted with seriousness.
+      Pioneering is not handled lightly at LNI — an apostolic leader
+      will contact you personally within 72 hours to begin a conversation.
+    </div>
+    <div class="conf-steps">
+      <div class="conf-step">
+        <span class="conf-step-num">01</span>
+        <span class="conf-step-text">Check your email — confirmation sent</span>
+      </div>
+      <div class="conf-step">
+        <span class="conf-step-num">02</span>
+        <span class="conf-step-text">An LNI apostolic leader will contact you on WhatsApp within 72 hours</span>
+      </div>
+      <div class="conf-step">
+        <span class="conf-step-num">03</span>
+        <span class="conf-step-text">You will go through a brief pioneer assessment conversation</span>
+      </div>
+      <div class="conf-step">
+        <span class="conf-step-num">04</span>
+        <span class="conf-step-text">If the timing is right, you will be commissioned and equipped to launch</span>
+      </div>
+    </div>
+  </div>
+  <div class="conf-actions">
+    <a href="YOUR_WHATSAPP_GROUP_LINK_HERE" target="_blank" class="wa-btn">
+      <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zM12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.528 5.845L.057 23.998l6.306-1.652A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.007-1.371l-.36-.214-3.732.978 1-3.64-.235-.374A9.818 9.818 0 1112 21.818z"/></svg>
+      Join the LNI WhatsApp Community
+    </a>
+    <a href="https://lehemnetwork.org" class="back-link">Return to LNI Global →</a>
+  </div>
+</div>
+
+<!-- FIREBASE -->
+<script type="module">
+import{initializeApp}from'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+import{getFirestore,addDoc,collection,serverTimestamp}from'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+const cfg={
+  apiKey:"YOUR_API_KEY",
+  authDomain:"YOUR_PROJECT_ID.firebaseapp.com",
+  projectId:"YOUR_PROJECT_ID",
+  storageBucket:"YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId:"YOUR_SENDER_ID",
+  appId:"YOUR_APP_ID"
+};
+const app=initializeApp(cfg);
+const db=getFirestore(app);
+window._db=db;window._add=addDoc;window._col=collection;window._ts=serverTimestamp;
+</script>
+
+<script>
+// PARTICLES — slightly more intense for pioneer page
+const cv=document.getElementById('cv'),cx=cv.getContext('2d');
+let W,H,pts=[];
+function rsz(){W=cv.width=innerWidth;H=cv.height=innerHeight}
+rsz();addEventListener('resize',rsz);
+function mkp(){return{x:Math.random()*W,y:H+5,s:Math.random()*1.5+0.3,sp:Math.random()*0.4+0.1,o:Math.random()*0.35+0.04,d:(Math.random()-0.5)*0.3}}
+for(let i=0;i<55;i++){const p=mkp();p.y=Math.random()*H;pts.push(p)}
+(function anim(){
+  cx.clearRect(0,0,W,H);
+  pts.forEach((p,i)=>{p.y-=p.sp;p.x+=p.d;p.o-=0.00022;
+    if(p.y<-5||p.o<=0)pts[i]=mkp();
+    cx.beginPath();cx.arc(p.x,p.y,p.s,0,Math.PI*2);
+    cx.fillStyle=`rgba(201,146,42,${p.o})`;cx.fill();
+  });requestAnimationFrame(anim);
+})();
+
+const SCENES=['si','s-cost','s-name','s-loc','s-email','s-phone','s-gather','s-vision','ss1','sc'];
+const PDOTS=['s-name','s-loc','s-email','s-phone','s-gather','s-vision'];
+let idx=0;
+const A={fn:'',city:'',country:'',email:'',phone:'',gather:'',vision:''};
+
+const prog=document.getElementById('prog');
+PDOTS.forEach((_,i)=>{const d=document.createElement('div');d.className='pd';d.id='pd'+i;prog.appendChild(d)});
+
+function upChrome(){
+  const pi=PDOTS.indexOf(SCENES[idx]);
+  prog.classList.toggle('show',pi>=0);
+  document.getElementById('nav').classList.toggle('show',idx>1&&SCENES[idx]!=='sc');
+  PDOTS.forEach((_,i)=>{const d=document.getElementById('pd'+i);
+    d.classList.remove('now','done');
+    if(i<pi)d.classList.add('done');else if(i===pi)d.classList.add('now');
+  });
+}
+
+function goTo(i){
+  document.getElementById(SCENES[idx]).classList.remove('active');
+  idx=i;document.getElementById(SCENES[idx]).classList.add('active');
+  upChrome();
+  setTimeout(()=>{const inp=document.querySelector(`#${SCENES[idx]} input,#${SCENES[idx]} textarea`);if(inp)inp.focus();},550);
+}
+
+window.begin=()=>{burst();setTimeout(()=>goTo(1),400)};
+window.next=()=>{if(!validate())return;collect();burst();setTimeout(()=>goTo(idx+1),400)};
+window.goBack=()=>{if(idx>1)goTo(idx-1)};
+
+function burst(){
+  const b=document.getElementById('burst'),s=b.querySelector('.bsym');
+  b.style.opacity=1;s.classList.remove('go');void s.offsetWidth;s.classList.add('go');
+  setTimeout(()=>{b.style.opacity=0;s.classList.remove('go')},640);
+}
+
+function flash(m){
+  let el=document.getElementById('fl');
+  if(!el){el=document.createElement('div');el.id='fl';
+    el.style.cssText='position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:rgba(220,60,60,0.1);border:1px solid rgba(220,60,60,0.28);border-radius:6px;padding:10px 22px;color:#F08080;font-size:13px;z-index:300;transition:opacity 0.3s';
+    document.body.appendChild(el);}
+  el.textContent=m;el.style.opacity=1;
+  clearTimeout(el._t);el._t=setTimeout(()=>el.style.opacity=0,3200);
+}
+
+function validate(){
+  const s=SCENES[idx];
+  if(s==='s-cost'&&!document.getElementById('affirm').classList.contains('checked'))
+    return flash('Please read and affirm the statement before continuing.'),false;
+  if(s==='s-name'&&!document.getElementById('fn').value.trim())return flash('Please enter your name.'),false;
+  if(s==='s-loc'&&(!document.getElementById('cy').value.trim()||!document.getElementById('co').value.trim()))
+    return flash('Please enter both your city and country.'),false;
+  if(s==='s-email'){const e=document.getElementById('em').value.trim();if(!e||!e.includes('@'))return flash('Please enter a valid email.'),false;}
+  if(s==='s-phone'&&!document.getElementById('ph').value.trim())return flash('Please enter your WhatsApp number.'),false;
+  if(s==='s-vision'&&document.getElementById('vis').value.trim().length<10)
+    return flash('Please share your vision — even a few sentences.'),false;
+  return true;
+}
+
+function collect(){
+  const s=SCENES[idx];
+  if(s==='s-name'){
+    A.fn=document.getElementById('fn').value.trim();
+    document.getElementById('q-loc-h').textContent=`${A.fn}, which city are you pioneering in?`;
+    document.getElementById('q-email-h').textContent=`Your email address, ${A.fn}`;
+    document.getElementById('q-phone-h').textContent=`Your WhatsApp number`;
+    document.getElementById('q-gather-h').textContent=`${A.fn}, how many men could you realistically gather?`;
+    document.getElementById('q-vision-h').textContent=`${A.fn}, what is your vision for your city?`;
+  }
+  if(s==='s-loc'){A.city=document.getElementById('cy').value.trim();A.country=document.getElementById('co').value.trim();}
+  if(s==='s-email')A.email=document.getElementById('em').value.trim();
+  if(s==='s-phone')A.phone=document.getElementById('ph').value.trim();
+  if(s==='s-vision')A.vision=document.getElementById('vis').value.trim();
+}
+
+window.pick=function(el,field,val){
+  el.closest('.cg').querySelectorAll('.ch').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');A[field]=val;
+  setTimeout(()=>window.next(),560);
+};
+
+window.toggleAffirm=function(){
+  const el=document.getElementById('affirm');el.classList.toggle('checked');
+  document.getElementById('cost-btn').classList.toggle('show',el.classList.contains('checked'));
+};
+
+window.submitAndShow=async function(){
+  document.getElementById('c-title').textContent=`${A.fn} — ${A.city}`;
+  document.getElementById('c-loc').textContent=`Pioneer Interest · ${A.country}`;
+  try{
+    await window._add(window._col(window._db,'network_interest'),{
+      ...A,type:'pioneer',submittedAt:window._ts(),
+    });
+  }catch(e){console.warn(e);}
+  burst();setTimeout(()=>goTo(SCENES.indexOf('sc')),400);
+};
+
+function wire(id,bid,tid){
+  const inp=document.getElementById(id);if(!inp)return;
+  inp.addEventListener('input',()=>{
+    const ok=inp.value.trim().length>0;
+    document.getElementById(bid)?.classList.toggle('on',ok);
+    document.getElementById(tid)?.classList.toggle('on',ok);
+  });
+}
+wire('fn','bg-name','et-name');
+wire('em','bg-email','et-email');
+wire('ph','bg-phone','et-phone');
+['cy','co'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('input',()=>{
+    const ok=document.getElementById('cy').value.trim()&&document.getElementById('co').value.trim();
+    document.getElementById('bg-loc')?.classList.toggle('on',!!ok);
+    document.getElementById('et-loc')?.classList.toggle('on',!!ok);
+  });
+});
+
+document.getElementById('vis').addEventListener('input',function(){
+  document.getElementById('bg-vision')?.classList.toggle('on',this.value.trim().length>9);
+});
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&!e.shiftKey){
+    const ts=['s-name','s-loc','s-email','s-phone'];
+    if(ts.includes(SCENES[idx])){e.preventDefault();window.next();}
+  }
+});
+</script>
+</body>
+</html>
