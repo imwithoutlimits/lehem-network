@@ -1250,7 +1250,17 @@ window.copyProfileUrl=function(){
   const btn=document.getElementById('copy-profile-btn');
   if(url&&btn)robustCopy(url,btn,'Copy Link');
 };
-
+window.unlockProfile=function(){
+  const wrap=document.getElementById('profile-actions-wrap');
+  if(wrap&&wrap.style.display==='none'){
+    wrap.style.display='block';
+    wrap.style.opacity='0';
+    setTimeout(()=>{
+      wrap.style.transition='opacity 0.6s ease';
+      wrap.style.opacity='1';
+    },100);
+  }
+};
 window.skipShare=function(){
   const rw=document.getElementById('rw');
   rw.style.opacity='0';
