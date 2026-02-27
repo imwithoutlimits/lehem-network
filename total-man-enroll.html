@@ -717,7 +717,7 @@ body{font-family:'Lato',sans-serif;background:var(--deep);color:var(--text)}
     <a href="https://lehemnetwork.org" class="sl">Return to LNI Global →</a>
   </div>
    <!-- PROFILE ACTIONS -->
-<div class="profile-actions">
+<div class="profile-actions" id="profile-actions-wrap" style="display:none">
   <p class="profile-actions-label">Your Journey Resources</p>
   <div class="pa-grid">
 
@@ -1242,6 +1242,7 @@ window.copyShareMsg=function(){
   const msg=document.getElementById('rmsg').textContent;
   const btn=document.getElementById('rcpbtn');
   if(msg&&btn)robustCopy(msg,btn,'Copy Message');
+  unlockProfile();
 };
 
 window.copyProfileUrl=function(){
