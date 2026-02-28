@@ -1165,31 +1165,31 @@ function waitForFirebase(fn,attempts){
   else if(attempts<20){setTimeout(()=>waitForFirebase(fn,attempts+1),300);}
 }
 
-// Check localStorage for returning visitor BEFORE Firebase check
 function checkLocalStorage(){
   try{
     const saved=localStorage.getItem('lni_tm_profile');
-    if(!saved)return false;
+    if(!saved)return;
     const data=JSON.parse(saved);
-    if(!data.email||!data.enrollNumber)return false;
-    // Valid saved profile found — show it
-    SCENES.forEach(s=>document.getElementById(s).classList.remove('active'));
-    document.getElementById('sc').classList.add('active');
-    showProfile(data,false);
-    document.getElementById('prog').classList.remove('show');
-    document.getElementById('nav').classList.remove('show');
-    return true;
-  }catch(e){return false;}
+    if(!data.email||!data.enrollNumber)return;
+    const btn=document.querySelector('.i-btn');
+    if(!btn)return;
+    const nudge=document.createElement('div');
+    nudge.style.cssText='margin-top:18px;opacity:0;animation:fup 0.8s 3.5s ease forwards;text-align:center';
+    nudge.innerHTML=`<a href="${location.origin}${location.pathname}?p=${data.enrollNumber.replace('#TM-2026-','')}"
+      style="font-family:'Cinzel',serif;font-size:12px;color:var(--muted);letter-spacing:0.15em;
+      text-decoration:none;border-bottom:1px solid var(--dim);padding-bottom:2px;transition:color 0.2s"
+      onmouseover="this.style.color='var(--gold)'"
+      onmouseout="this.style.color='var(--muted)'">
+      Already enrolled as ${data.firstName} — View my profile →
+    </a>`;
+    btn.parentNode.insertBefore(nudge, btn.nextSibling);
+  }catch(e){}
 }
 
-// Run: URL param check first, then localStorage fallback
 waitForFirebase(()=>{
   const hasUrlParam=new URLSearchParams(location.search).get('p');
-  if(hasUrlParam){
-    checkViewParam();
-  } else {
-    checkLocalStorage();
-  }
+  if(hasUrlParam){checkViewParam();}
+  else{checkLocalStorage();}
 });
 
 // 3D CARD
